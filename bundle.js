@@ -1283,8 +1283,9 @@ function exportPDF(svgElement, name) {
   svgElement.getBoundingClientRect(); // force layout calculation
   const width = svgElement.width.baseVal.value;
   const height = svgElement.height.baseVal.value + 5;
-  // const pdf = new jsPDF(width > height ? 'l' : 'p', 'pt', [width, height])
-  const pdf = new jsPDF('p', 'pt', "a4");
+  const pdf = new jsPDF(width > height ? 'l' : 'p', 'pt', [width, height]);
+  // const pdf = new jsPDF('p', 'pt', "a4");
+
   pdf.svg(svgElement, {
     width,
     height
