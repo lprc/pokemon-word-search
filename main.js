@@ -287,7 +287,7 @@ function generateSVG(grid) {
         for (let col = 0; col < gridSize; col++) {
             let rngChar = String.fromCharCode(65 + Math.floor(Math.random() * 26));
             svgContent += `<text x="${col * 15 + 5}" y="${row * 15 + 15}" text-anchor="middle" fill="black">${grid[row][col] ? grid[row][col].toUpperCase() : rngChar}</text>`;
-            svgContentSolution += `<text x="${col * 15 + 5}" y="${row * 15 + 15}" text-anchor="middle" fill="${grid[row][col] ? 'red' : 'black'}">${grid[row][col] ? grid[row][col].toUpperCase() : rngChar}</text>`;
+            svgContentSolution += `<text x="${col * 15 + 5}" y="${row * 15 + 15}" text-anchor="middle" fill="${grid[row][col] ? 'red' : 'black'}" font-weight="${grid[row][col] ? 'bold' : 'normal'}">${grid[row][col] ? grid[row][col].toUpperCase() : rngChar}</text>`;
         }
     }
     svgContent += `</svg>`;
