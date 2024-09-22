@@ -1044,6 +1044,28 @@ const retries = 50; // number of retries to place a pokemon
 
 window.addEventListener("DOMContentLoaded", function (event) {
     document.getElementById('btnGenerate').onclick = onGenerate;
+
+    document.getElementById('btnAllDirs').onclick = function () {
+        document.getElementById('dir1').checked = true;
+        document.getElementById('dir2').checked = true;
+        document.getElementById('dir3').checked = true;
+        document.getElementById('dir4').checked = true;
+        document.getElementById('dir5').checked = true;
+        document.getElementById('dir6').checked = true;
+        document.getElementById('dir7').checked = true;
+        document.getElementById('dir8').checked = true;
+    };
+
+    document.getElementById('btnNoneDirs').onclick = function () {
+        document.getElementById('dir1').checked = false;
+        document.getElementById('dir2').checked = false;
+        document.getElementById('dir3').checked = false;
+        document.getElementById('dir4').checked = false;
+        document.getElementById('dir5').checked = false;
+        document.getElementById('dir6').checked = false;
+        document.getElementById('dir7').checked = false;
+        document.getElementById('dir8').checked = false;
+    };
 });
 
 // callback for submit
