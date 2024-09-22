@@ -1,0 +1,17 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+.container {
+    margin-bottom: 20px;
+}
+
+.svg-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.svg-circle {
+    margin: 10px;
+}

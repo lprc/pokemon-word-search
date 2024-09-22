@@ -1,0 +1,26 @@
+{
+  "name": "pokemon-word-search",
+  "version": "1.0.0",
+  "description": "A Word Search Puzzle Generator with Pokemons to find",
+  "main": "main.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-js": "browserify -p esmify ./main.js -o ./bundle.js",
+    "watch-js": "watchify -p esmify ./main.js -o ./bundle.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "jspdf": "^2.5.2",
+    "svg2pdf.js": "^2.2.4"
+  },
+  "devDependencies": {
+    "browserify": "^17.0.0",
+    "esmify": "^2.1.1",
+    "watchify": "^4.0.0"
+  }
+}

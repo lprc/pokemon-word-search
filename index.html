@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokemon Word Search Generator</title>
+    <!-- Link to the external CSS file -->
+    <link rel="stylesheet" href="main.css">
+</head>
+
+<body>
+
+    <h1>Pokemon Word Search Generator</h1>
+
+    <form id="myForm" onsubmit="return generateSVGs(event)">
+        <div class="container">
+            <h2>Language</h2>
+            <label><input type="radio" name="lang" value="en" checked> English</label><br>
+            <label><input type="radio" name="lang" value="de"> Deutsch</label>
+        </div>
+
+        <div class="container"></div>
+        <h2>Generations</h2>
+        <label><input type="checkbox" name="gen1" checked> 1</label><br>
+        <label><input type="checkbox" name="gen2" checked> 2</label><br>
+        <label><input type="checkbox" name="gen3" checked> 3</label><br>
+        <label><input type="checkbox" name="gen4" checked> 4</label>
+        </div>
+
+        <div class="container">
+            <h2>Word Directions</h2>
+            <label><input type="checkbox" name="dir1" checked> horizontal</label><br>
+            <label><input type="checkbox" name="dir2" checked> horizontal reversed</label><br>
+            <label><input type="checkbox" name="dir3" checked> vertical</label><br>
+            <label><input type="checkbox" name="dir4" checked> vertical reversed</label><br>
+            <label><input type="checkbox" name="dir5" checked> diagonal top-left to bottom-right</label><br>
+            <label><input type="checkbox" name="dir6" checked> diagonal bottom-right to top-left</label><br>
+            <label><input type="checkbox" name="dir7" checked> diagonal top-right to bottom-left</label><br>
+            <label><input type="checkbox" name="dir8" checked> diagonal bottom-left to top-right</label>
+        </div>
+
+        <div class="container">
+            <h2>Number of puzzles to generate (1-10)</h2>
+            <input type="number" name="numberInput" id="numberInput" min="1" max="10" value="1" required>
+        </div>
+
+        <button type="submit">Generate</button>
+
+
+        <div class="container">
+            <h2>SVG Preview</h2>
+            <div class="svg-container" id="svgContainer"></div>
+        </div>
+    </form>
+
+    <!-- Link to the external JavaScript file -->
+    <!-- <script src="[node_modules|bower_components]/jspdf/dist/jspdf.umd.min.js"></script>
+    <script src="[node_modules|bower_components]/svg2pdf.js/dist/svg2pdf.umd.min.js"></script> -->
+    <script type="module" src="bundle.js"></script>
+</body>
+
+</html>
