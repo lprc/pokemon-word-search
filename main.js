@@ -45,6 +45,13 @@ window.addEventListener("DOMContentLoaded", function (event) {
         document.getElementById('dir7').checked = false;
         document.getElementById('dir8').checked = false;
     };
+
+    document.getElementById('btnDownloadPdf').onclick = function () {
+        let svgElement = document.getElementById('svgContainer').firstElementChild;
+        let svgElementSolution = document.getElementById('svgContainerSolution').firstElementChild;
+        exportPDF(svgElement, "puzzle");
+        exportPDF(svgElementSolution, "solution");
+    };
 });
 
 // callback for submit
@@ -278,8 +285,9 @@ function generateSVG(grid) {
 
     for (let row = 0; row < gridSize; row++) {
         for (let col = 0; col < gridSize; col++) {
-            svgContent += `<text x="${col * 15 + 5}" y="${row * 15 + 15}" text-anchor="middle" fill="black">${grid[row][col] ? grid[row][col].toUpperCase() : String.fromCharCode(65 + Math.floor(Math.random() * 26))}</text>`;
-            svgContentSolution += `<text x="${col * 15 + 5}" y="${row * 15 + 15}" text-anchor="middle" fill="${grid[row][col] ? 'red' : 'black'}">${grid[row][col] ? grid[row][col].toUpperCase() : String.fromCharCode(65 + Math.floor(Math.random() * 26))}</text>`;
+            let rngChar = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+            svgContent += `<text x="${col * 15 + 5}" y="${row * 15 + 15}" text-anchor="middle" fill="black">${grid[row][col] ? grid[row][col].toUpperCase() : rngChar}</text>`;
+            svgContentSolution += `<text x="${col * 15 + 5}" y="${row * 15 + 15}" text-anchor="middle" fill="${grid[row][col] ? 'red' : 'black'}">${grid[row][col] ? grid[row][col].toUpperCase() : rngChar}</text>`;
         }
     }
     svgContent += `</svg>`;
@@ -287,12 +295,20 @@ function generateSVG(grid) {
 
     document.getElementById('svgContainer').innerHTML = svgContent;
     document.getElementById('svgContainerSolution').innerHTML = svgContentSolution;
+}
 
-    // Convert SVG to PDF
-    // const svgElement = new Blob([svgContent], { type: 'image/svg+xml' });
-    // const pdf = new jsPDF();
-    // svg2pdf(svgElement, pdf);
-    // pdf.save("crossword.pdf");
+// export pdf
+function exportPDF(svgElement, name) {
+    svgElement.getBoundingClientRect() // force layout calculation
+    const width = svgElement.width.baseVal.value
+    const height = svgElement.height.baseVal.value + 5
+    const pdf = new jsPDF(width > height ? 'l' : 'p', 'pt', [width, height])
+
+    pdf.svg(svgElement, { width, height })
+        .then(() => {
+            // save the created pdf
+            pdf.save(`${name}.pdf`)
+        })
 }
 
 // Reverse a string
