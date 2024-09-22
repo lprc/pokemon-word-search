@@ -19,8 +19,7 @@ const DIR = Object.freeze({
 });
 
 const gridSize = 20;
-let grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(''));
-const retries = 20; // number of retries to place a pokemon
+const retries = 50; // number of retries to place a pokemon
 
 window.addEventListener("DOMContentLoaded", function (event) {
     document.getElementById('btnGenerate').onclick = onGenerate;
@@ -62,6 +61,8 @@ function onGenerate() {
 
     const language = document.querySelector('input[name="lang"]:checked').value;
 
+    const numberOfPokemons = document.getElementById('numPokemons').value;
+
     // load pokemons by language and generation
     let pokemons = [];
     if (language == "de") {
@@ -75,6 +76,16 @@ function onGenerate() {
             (gen2 ? pokemons_en[1] : []),
             (gen3 ? pokemons_en[2] : []),
             (gen4 ? pokemons_en[3] : []));
+    }
+
+    // take random entries from pokemons
+    const pokemon_filtered = [];
+    while (pokemon_filtered.length < numberOfPokemons) {
+        const randomIndex = Math.floor(Math.random() * pokemons.length);
+        const randomPokemon = pokemons.splice(randomIndex, 1)[0];
+        if (!randomPokemon.length <= gridSize && !pokemon_filtered.includes(randomPokemon)) {
+            pokemon_filtered.push(randomPokemon);
+        }
     }
 
     if (DEBUG) {
@@ -95,23 +106,21 @@ function onGenerate() {
 
         console.log("language: " + language);
 
+        console.log("number of pokemons: " + numberOfPokemons)
+
         console.log("first pokemon: " + pokemons[0]);
+
+        console.log("pokemons: " + pokemon_filtered);
+        console.log("dirs: " + dirs.map(dirToStr));
     }
 
-    // take random 20 entries from pokemons
-    const pokemon_filtered = [];
-    while (pokemon_filtered.length < 20) {
-        const randomIndex = Math.floor(Math.random() * pokemons.length);
-        const randomPokemon = pokemons.splice(randomIndex, 1)[0];
-        if (!randomPokemon.length <= gridSize && !pokemon_filtered.includes(randomPokemon)) {
-            pokemon_filtered.push(randomPokemon);
-        }
-    }
 
-    generateCrossword(pokemon_filtered, dirs);
+    let grid = generateCrossword(pokemon_filtered, dirs);
+    generateSVG(grid);
 }
 
 function generateCrossword(inputWords, dirs) {
+    var grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(''));
     for (const word of inputWords) {
         let placed = false;
         let dir = dirs[Math.floor(Math.random() * dirs.length)];
@@ -121,14 +130,19 @@ function generateCrossword(inputWords, dirs) {
             const startRow = Math.floor(Math.random() * gridSize);
             const startCol = Math.floor(Math.random() * gridSize);
 
-            if (canPlaceWord(word, startRow, startCol, dir)) {
-                placeWord(word, startRow, startCol, dir);
+            if (canPlaceWord(grid, word, startRow, startCol, dir)) {
+                placeWord(grid, word, startRow, startCol, dir);
                 placed = true;
                 if (DEBUG) {
-                    console.log(`word '${word}' placed at [${startRow}, ${startCol}] with direction '${dir}'`);
+                    console.log(`word '${word}' placed at [${startRow}, ${startCol}] with direction '${dirToStr(dir)}'`);
                 }
             }
             tryno++;
+
+        }
+
+        if (DEBUG && !placed) {
+            console.log(`failed to place word '${word}' with direction '${dirToStr(dir)}'. Max retries reached.`);
         }
     }
 
@@ -137,11 +151,11 @@ function generateCrossword(inputWords, dirs) {
         console.table(grid);
     }
 
-    generateSVG();
+    return grid;
     // generatePDF();
 }
 
-function canPlaceWord(word, row, col, direction) {
+function canPlaceWord(grid, word, row, col, direction) {
     if (direction === DIR.LR) {
         if (col + word.length > gridSize) return false;
         for (let i = 0; i < word.length; i++) {
@@ -180,20 +194,20 @@ function canPlaceWord(word, row, col, direction) {
         }
     } else if (direction === DIR.BLTR) {
         for (let i = 0; i < word.length; i++) {
-            if (row - i >= 0 || col + i >= 0 ||
+            if (row - i < 0 || col + i < 0 ||
                 (grid[row - i][col + i] !== '' && grid[row - i][col + i] !== word[i])) return false;
         }
-    } else if (direction === DIR.TLBR) {
+    } else if (direction === DIR.TRBL) {
         word = reverse(word);
         for (let i = 0; i < word.length; i++) {
-            if (row - i >= 0 || col + i >= 0 ||
+            if (row - i < 0 || col + i < 0 ||
                 (grid[row - i][col + i] !== '' && grid[row - i][col + i] !== word[i])) return false;
         }
     }
     return true;
 }
 
-function placeWord(word, row, col, direction) {
+function placeWord(grid, word, row, col, direction) {
     if (direction === DIR.LR) {
         for (let i = 0; i < word.length; i++) {
             grid[row][col + i] = word[i];
@@ -217,7 +231,7 @@ function placeWord(word, row, col, direction) {
         }
     } else if (direction === DIR.TLBR) {
         for (let i = 0; i < word.length; i++) {
-            [row + i][col + i] = word[i];
+            grid[row + i][col + i] = word[i];
         }
     } else if (direction === DIR.BRTL) {
         word = reverse(word);
@@ -228,7 +242,7 @@ function placeWord(word, row, col, direction) {
         for (let i = 0; i < word.length; i++) {
             grid[row - i][col + i] = word[i];
         }
-    } else if (direction === DIR.TLBR) {
+    } else if (direction === DIR.TRBL) {
         word = reverse(word);
         for (let i = 0; i < word.length; i++) {
             grid[row - i][col + i] = word[i];
@@ -236,7 +250,7 @@ function placeWord(word, row, col, direction) {
     }
 }
 
-function generateSVG() {
+function generateSVG(grid) {
     let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${gridSize * 15}" height="${gridSize * 15}" font-size="16" font-family="monospace">`;
     let svgContentSolution = svgContent;
 
@@ -259,28 +273,18 @@ function generateSVG() {
     // pdf.save("crossword.pdf");
 }
 
-// Example input
-// const inputWords = ["sun", "moon", "earth", "star", "planet", "galaxy", "cosmos", "space", "universe", "blackhole", "gravity", "lightyear", "asteroid", "comet", "nebula", "quasar", "supernova", "satellite", "orbital", "solstice"];
-// generateCrossword(inputWords);
-
-function generateSVGs(event) {
-    event.preventDefault(); // Prevent default form submission
-    const numberInput = document.getElementById('numberInput').value;
-    const svgContainer = document.getElementById('svgContainer');
-    svgContainer.innerHTML = ''; // Clear previous SVGs
-
-    // Generate the requested number of SVG circles
-    for (let i = 0; i < numberInput; i++) {
-        const svgElement = document.createElement('svg');
-        svgElement.setAttribute('width', '100');
-        svgElement.setAttribute('height', '100');
-        svgElement.classList.add('svg-circle');
-        svgElement.innerHTML = '<circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" />';
-        svgContainer.appendChild(svgElement);
-    }
-}
-
 // Reverse a string
 function reverse(s) {
     return s.split("").reverse().join("");
+}
+
+function dirToStr(dir) {
+    if (dir === DIR.LR) return "LR";
+    if (dir === DIR.RL) return "RL";
+    if (dir === DIR.TB) return "TB";
+    if (dir === DIR.BT) return "BT";
+    if (dir === DIR.TLBR) return "TLBR";
+    if (dir === DIR.BRTL) return "BRTL";
+    if (dir === DIR.BLTR) return "BLTR";
+    if (dir === DIR.TRBL) return "TRBL";
 }
