@@ -56,6 +56,9 @@ window.addEventListener("DOMContentLoaded", function (event) {
 
 // callback for submit
 function onGenerate() {
+    document.getElementById('puzzles-container').innerHTML = "";
+    document.getElementById('solutions-container').innerHTML = "";
+
     const dir1 = document.getElementById('dir1').checked;
     const dir2 = document.getElementById('dir2').checked;
     const dir3 = document.getElementById('dir3').checked;
@@ -91,6 +94,8 @@ function onGenerate() {
     const language = document.querySelector('input[name="lang"]:checked').value;
 
     const numberOfPokemons = document.getElementById('numPokemons').value;
+
+    const numberOfPuzzles = document.getElementById('numPuzzles').value;
 
     // load pokemons by language and generation
     let pokemons = [];
@@ -135,7 +140,8 @@ function onGenerate() {
 
         console.log("language: " + language);
 
-        console.log("number of pokemons: " + numberOfPokemons)
+        console.log("number of pokemons: " + numberOfPokemons);
+        console.log("number of puzzles: " + numberOfPuzzles);
 
         console.log("first pokemon: " + pokemons[0]);
 
@@ -143,12 +149,13 @@ function onGenerate() {
         console.log("dirs: " + dirs.map(dirToStr));
     }
 
-
-    let grid = generateCrossword(pokemon_filtered, dirs);
-    generateSVG(grid);
+    for (let i = 0; i < numberOfPuzzles; i++) {
+        let grid = generatePuzzle(pokemon_filtered, dirs);
+        generateSVG(grid);
+    }
 }
 
-function generateCrossword(inputWords, dirs) {
+function generatePuzzle(inputWords, dirs) {
     var grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(''));
     for (const word of inputWords) {
         let placed = false;
@@ -280,8 +287,8 @@ function placeWord(grid, word, row, col, direction) {
 }
 
 function generateSVG(grid) {
-    let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${gridSize * 15}" height="${gridSize * 15}" font-size="16" font-family="monospace">`;
-    let svgContentSolution = svgContent;
+    let svgContent = "";
+    let svgContentSolution = "";
 
     for (let row = 0; row < gridSize; row++) {
         for (let col = 0; col < gridSize; col++) {
@@ -290,11 +297,30 @@ function generateSVG(grid) {
             svgContentSolution += `<text x="${col * 15 + 5}" y="${row * 15 + 15}" text-anchor="middle" fill="${grid[row][col] ? 'red' : 'black'}" font-weight="${grid[row][col] ? 'bold' : 'normal'}">${grid[row][col] ? grid[row][col].toUpperCase() : rngChar}</text>`;
         }
     }
-    svgContent += `</svg>`;
-    svgContentSolution += `</svg>`;
+    // svgContent += `</svg>`;
+    // svgContentSolution += `</svg>`;
 
-    document.getElementById('svgContainer').innerHTML = svgContent;
-    document.getElementById('svgContainerSolution').innerHTML = svgContentSolution;
+    const svgContainer1 = document.createElement('div');
+    svgContainer1.classList.add('svg-container');
+    const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svgElement.setAttribute('width', gridSize * 15);
+    svgElement.setAttribute('height', gridSize * 15);
+    svgElement.setAttribute('font-size', '16');
+    svgElement.setAttribute('font-family', 'monospace');
+    svgElement.innerHTML = svgContent;
+    svgContainer1.appendChild(svgElement);
+    document.getElementById('puzzles-container').appendChild(svgContainer1);
+
+    const svgContainer2 = document.createElement('div');
+    svgContainer2.classList.add('svg-container');
+    const svgElementSolution = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svgElementSolution.setAttribute('width', gridSize * 15);
+    svgElementSolution.setAttribute('height', gridSize * 15);
+    svgElementSolution.setAttribute('font-size', '16');
+    svgElementSolution.setAttribute('font-family', 'monospace');
+    svgElementSolution.innerHTML = svgContentSolution;
+    svgContainer2.appendChild(svgElementSolution);
+    document.getElementById('solutions-container').appendChild(svgContainer2);
 }
 
 // export pdf

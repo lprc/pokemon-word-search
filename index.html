@@ -42,10 +42,10 @@
     <button id="btnAllDirs">Select All</button>
     <button id="btnNoneDirs">Select None</button>
 
-    <!-- <div class="container">
+    <div class="container">
         <h2>Number of puzzles to generate (1-10)</h2>
-        <input type="number" name="numberInput" id="numberInput" min="1" max="10" value="1" required>
-    </div> -->
+        <input type="number" name="numPuzzles" id="numPuzzles" min="1" max="10" value="1" required>
+    </div>
 
     <div class="container"></div>
     <h2>Number of pokemons to place (1-30)</h2>
@@ -58,9 +58,13 @@
 
     <div class="container">
         <h2>SVG Preview</h2>
-        <div class="svg-container" id="svgContainer"></div>
+        <div id="puzzles-container" class="svg-collection">
+            <div class="svg-container" id="svgContainer"></div>
+        </div>
         <hr>
-        <div class="svg-container" id="svgContainerSolution"></div>
+        <div id="solutions-container" class="svg-collection">
+            <div class="svg-container" id="svgContainerSolution"></div>
+        </div>
     </div>
 
     <script type="module" src="bundle.js"></script>
