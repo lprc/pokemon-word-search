@@ -8,8 +8,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build-js": "browserify -p esmify ./main.js -o ./bundle.js",
-    "watch-js": "watchify -p esmify ./main.js -o ./bundle.js"
+    "build-js": "browserify -p esmify ./main.js ./data/pokemons.en.js -o ./bundle.js",
+    "watch-js": "watchify -p esmify ./main.js ./data/pokemons.en.js -o ./bundle.js"
   },
   "keywords": [],
   "author": "",

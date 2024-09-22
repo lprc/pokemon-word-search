@@ -1,9 +1,74 @@
 const { jsPDF } = require("jspdf"); // Make sure to install jsPDF in your project using npm or CDN.
 const svg2pdf = require("svg2pdf.js"); // Include the svg2pdf.js library for converting SVG to PDF.
 
+const { pokemons_en } = require(`./data/pokemons.en.js`);
+const { pokemons_de } = require(`./data/pokemons.de.js`);
+
+const DEBUG = true;
+
 const gridSize = 20;
 let words = [];
 let grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(''));
+
+window.addEventListener("DOMContentLoaded", function (event) {
+    document.getElementById('btnGenerate').onclick = onGenerate;
+});
+
+// callback for submit
+function onGenerate() {
+    const dir1 = document.getElementById('dir1').checked;
+    const dir2 = document.getElementById('dir2').checked;
+    const dir3 = document.getElementById('dir3').checked;
+    const dir4 = document.getElementById('dir4').checked;
+    const dir5 = document.getElementById('dir5').checked;
+    const dir6 = document.getElementById('dir6').checked;
+    const dir7 = document.getElementById('dir7').checked;
+    const dir8 = document.getElementById('dir8').checked;
+
+    const gen1 = document.getElementById('gen1').checked;
+    const gen2 = document.getElementById('gen2').checked;
+    const gen3 = document.getElementById('gen3').checked;
+    const gen4 = document.getElementById('gen4').checked;
+
+    const language = document.querySelector('input[name="lang"]:checked').value;
+
+    // load pokemons by language and generation
+    let pokemons = [];
+    if (language == "de") {
+        pokemons = pokemons.concat((gen1 ? pokemons_de[0] : []),
+            (gen2 ? pokemons_de[1] : []),
+            (gen3 ? pokemons_de[2] : []),
+            (gen4 ? pokemons_de[3] : []));
+    }
+    else {
+        pokemons = pokemons.concat((gen1 ? pokemons_en[0] : []),
+            (gen2 ? pokemons_en[1] : []),
+            (gen3 ? pokemons_en[2] : []),
+            (gen4 ? pokemons_en[3] : []));
+    }
+
+    if (DEBUG) {
+        console.log("dir1: " + dir1);
+        console.log("dir2: " + dir2);
+        console.log("dir3: " + dir3);
+        console.log("dir4: " + dir4);
+        console.log("dir5: " + dir5);
+        console.log("dir6: " + dir6);
+        console.log("dir7: " + dir7);
+        console.log("dir8: " + dir8);
+
+        console.log("gen1: " + gen1);
+        console.log("gen2: " + gen2);
+        console.log("gen3: " + gen3);
+        console.log("gen4: " + gen4);
+
+        console.log("language: " + language);
+
+        console.log("first pokemon: " + pokemons[0]);
+    }
+
+    generateCrossword(pokemon);
+}
 
 function generateCrossword(inputWords) {
     words = inputWords;
