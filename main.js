@@ -6,9 +6,21 @@ const { pokemons_de } = require(`./data/pokemons.de.js`);
 
 const DEBUG = true;
 
+// directions enum
+const DIR = Object.freeze({
+    LR: 0, // left to right
+    RL: 1,
+    TB: 2, // top to bottom
+    BT: 3,
+    TLBR: 4, // top-left to bottom-right
+    BRTL: 5,
+    TRBL: 6,
+    BLTR: 7
+});
+
 const gridSize = 20;
-let words = [];
 let grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(''));
+const retries = 20; // number of retries to place a pokemon
 
 window.addEventListener("DOMContentLoaded", function (event) {
     document.getElementById('btnGenerate').onclick = onGenerate;
@@ -24,6 +36,24 @@ function onGenerate() {
     const dir6 = document.getElementById('dir6').checked;
     const dir7 = document.getElementById('dir7').checked;
     const dir8 = document.getElementById('dir8').checked;
+    // only checked directions
+    let dirs = [];
+    if (dir1)
+        dirs.push(DIR.LR);
+    if (dir2)
+        dirs.push(DIR.RL);
+    if (dir3)
+        dirs.push(DIR.TB);
+    if (dir4)
+        dirs.push(DIR.BT);
+    if (dir5)
+        dirs.push(DIR.TLBR);
+    if (dir6)
+        dirs.push(DIR.BRTL);
+    if (dir7)
+        dirs.push(DIR.TRBL);
+    if (dir8)
+        dirs.push(DIR.BLTR);
 
     const gen1 = document.getElementById('gen1').checked;
     const gen2 = document.getElementById('gen2').checked;
@@ -56,6 +86,7 @@ function onGenerate() {
         console.log("dir6: " + dir6);
         console.log("dir7: " + dir7);
         console.log("dir8: " + dir8);
+        console.log("dirs: " + dirs);
 
         console.log("gen1: " + gen1);
         console.log("gen2: " + gen2);
@@ -67,53 +98,140 @@ function onGenerate() {
         console.log("first pokemon: " + pokemons[0]);
     }
 
-    generateCrossword(pokemon);
-}
-
-function generateCrossword(inputWords) {
-    words = inputWords;
-
-    for (const word of words) {
-        let placed = false;
-
-        while (!placed) {
-            // Randomly choose a horizontal or vertical orientation
-            const orientation = Math.random() < 0.5 ? 'horizontal' : 'vertical';
-            const startRow = Math.floor(Math.random() * gridSize);
-            const startCol = Math.floor(Math.random() * gridSize);
-
-            if (canPlaceWord(word, startRow, startCol, orientation)) {
-                placeWord(word, startRow, startCol, orientation);
-                placed = true;
-            }
+    // take random 20 entries from pokemons
+    const pokemon_filtered = [];
+    while (pokemon_filtered.length < 20) {
+        const randomIndex = Math.floor(Math.random() * pokemons.length);
+        const randomPokemon = pokemons.splice(randomIndex, 1)[0];
+        if (!randomPokemon.length <= gridSize && !pokemon_filtered.includes(randomPokemon)) {
+            pokemon_filtered.push(randomPokemon);
         }
     }
 
-    generateSVG();
-    generatePDF();
+    generateCrossword(pokemon_filtered, dirs);
 }
 
-function canPlaceWord(word, row, col, orientation) {
-    if (orientation === 'horizontal') {
+function generateCrossword(inputWords, dirs) {
+    for (const word of inputWords) {
+        let placed = false;
+        let dir = dirs[Math.floor(Math.random() * dirs.length)];
+        let tryno = 0;
+
+        while (!placed && tryno < retries) {
+            const startRow = Math.floor(Math.random() * gridSize);
+            const startCol = Math.floor(Math.random() * gridSize);
+
+            if (canPlaceWord(word, startRow, startCol, dir)) {
+                placeWord(word, startRow, startCol, dir);
+                placed = true;
+                if (DEBUG) {
+                    console.log(`word '${word}' placed at [${startRow}, ${startCol}] with direction '${dir}'`);
+                }
+            }
+            tryno++;
+        }
+    }
+
+    if (DEBUG) {
+        console.log("grid: ");
+        console.table(grid);
+    }
+
+    // generateSVG();
+    // generatePDF();
+}
+
+function canPlaceWord(word, row, col, direction) {
+    if (direction === DIR.LR) {
         if (col + word.length > gridSize) return false;
         for (let i = 0; i < word.length; i++) {
             if (grid[row][col + i] !== '' && grid[row][col + i] !== word[i]) return false;
         }
-    } else {
+
+    } else if (direction === DIR.RL) {
+        word = reverse(word);
+        if (col + word.length > gridSize) return false;
+        for (let i = 0; i < word.length; i++) {
+            if (grid[row][col + i] !== '' && grid[row][col + i] !== word[i]) return false;
+        }
+    }
+    else if (direction === DIR.TB) {
         if (row + word.length > gridSize) return false;
         for (let i = 0; i < word.length; i++) {
             if (grid[row + i][col] !== '' && grid[row + i][col] !== word[i]) return false;
         }
     }
+    else if (direction === DIR.BT) {
+        word = reverse(word);
+        if (row + word.length > gridSize) return false;
+        for (let i = 0; i < word.length; i++) {
+            if (grid[row + i][col] !== '' && grid[row + i][col] !== word[i]) return false;
+        }
+    } else if (direction === DIR.TLBR) {
+        for (let i = 0; i < word.length; i++) {
+            if (row + i >= gridSize || col + i >= gridSize ||
+                (grid[row + i][col + i] !== '' && grid[row + i][col + i] !== word[i])) return false;
+        }
+    } else if (direction === DIR.BRTL) {
+        word = reverse(word);
+        for (let i = 0; i < word.length; i++) {
+            if (row + i >= gridSize || col + i >= gridSize ||
+                (grid[row + i][col + i] !== '' && grid[row + i][col + i] !== word[i])) return false;
+        }
+    } else if (direction === DIR.BLTR) {
+        for (let i = 0; i < word.length; i++) {
+            if (row - i >= 0 || col + i >= 0 ||
+                (grid[row - i][col + i] !== '' && grid[row - i][col + i] !== word[i])) return false;
+        }
+    } else if (direction === DIR.TLBR) {
+        word = reverse(word);
+        for (let i = 0; i < word.length; i++) {
+            if (row - i >= 0 || col + i >= 0 ||
+                (grid[row - i][col + i] !== '' && grid[row - i][col + i] !== word[i])) return false;
+        }
+    }
     return true;
 }
 
-function placeWord(word, row, col, orientation) {
-    for (let i = 0; i < word.length; i++) {
-        if (orientation === 'horizontal') {
+function placeWord(word, row, col, direction) {
+    if (direction === DIR.LR) {
+        for (let i = 0; i < word.length; i++) {
             grid[row][col + i] = word[i];
-        } else {
+        }
+
+    } else if (direction === DIR.RL) {
+        word = reverse(word);
+        for (let i = 0; i < word.length; i++) {
+            grid[row][col + i] = word[i];
+        }
+    }
+    else if (direction === DIR.TB) {
+        for (let i = 0; i < word.length; i++) {
             grid[row + i][col] = word[i];
+        }
+    }
+    else if (direction === DIR.BT) {
+        word = reverse(word);
+        for (let i = 0; i < word.length; i++) {
+            grid[row + i][col] = word[i];
+        }
+    } else if (direction === DIR.TLBR) {
+        for (let i = 0; i < word.length; i++) {
+            [row + i][col + i] = word[i];
+        }
+    } else if (direction === DIR.BRTL) {
+        word = reverse(word);
+        for (let i = 0; i < word.length; i++) {
+            grid[row + i][col + i] = word[i];
+        }
+    } else if (direction === DIR.BLTR) {
+        for (let i = 0; i < word.length; i++) {
+            grid[row - i][col + i] = word[i];
+        }
+    } else if (direction === DIR.TLBR) {
+        word = reverse(word);
+        for (let i = 0; i < word.length; i++) {
+            grid[row - i][col + i] = word[i];
         }
     }
 }
@@ -159,4 +277,9 @@ function generateSVGs(event) {
         svgElement.innerHTML = '<circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" />';
         svgContainer.appendChild(svgElement);
     }
+}
+
+// Reverse a string
+function reverse(s) {
+    return s.split("").reverse().join("");
 }
