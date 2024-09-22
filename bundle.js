@@ -1158,7 +1158,7 @@ function generateCrossword(inputWords, dirs) {
         console.table(grid);
     }
 
-    // generateSVG();
+    generateSVG();
     // generatePDF();
 }
 
@@ -1258,25 +1258,26 @@ function placeWord(word, row, col, direction) {
 }
 
 function generateSVG() {
-    let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" font-size="16">`;
+    let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${gridSize * 15}" height="${gridSize * 15}" font-size="16" font-family="monospace">`;
+    let svgContentSolution = svgContent;
 
     for (let row = 0; row < gridSize; row++) {
         for (let col = 0; col < gridSize; col++) {
-            svgContent += `<text x="${col * 10 + 5}" y="${row * 10 + 15}" text-anchor="middle" fill="black">${grid[row][col] || ''}</text>`;
-            if (grid[row][col]) {
-                svgContent += `<rect x="${col * 10}" y="${row * 10}" width="10" height="10" fill="none" stroke="black"/>`;
-            }
+            svgContent += `<text x="${col * 15 + 5}" y="${row * 15 + 15}" text-anchor="middle" fill="black">${grid[row][col] ? grid[row][col].toUpperCase() : String.fromCharCode(65 + Math.floor(Math.random() * 26))}</text>`;
+            svgContentSolution += `<text x="${col * 15 + 5}" y="${row * 15 + 15}" text-anchor="middle" fill="${grid[row][col] ? 'red' : 'black'}">${grid[row][col] ? grid[row][col].toUpperCase() : String.fromCharCode(65 + Math.floor(Math.random() * 26))}</text>`;
         }
     }
     svgContent += `</svg>`;
+    svgContentSolution += `</svg>`;
 
-    document.getElementById('crossword').innerHTML = svgContent;
+    document.getElementById('svgContainer').innerHTML = svgContent;
+    document.getElementById('svgContainerSolution').innerHTML = svgContentSolution;
 
     // Convert SVG to PDF
-    const svgElement = new Blob([svgContent], { type: 'image/svg+xml' });
-    const pdf = new jsPDF();
-    svg2pdf(svgElement, pdf);
-    pdf.save("crossword.pdf");
+    // const svgElement = new Blob([svgContent], { type: 'image/svg+xml' });
+    // const pdf = new jsPDF();
+    // svg2pdf(svgElement, pdf);
+    // pdf.save("crossword.pdf");
 }
 
 // Example input
