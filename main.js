@@ -394,10 +394,17 @@ function exportPDFa4() {
 
     const numPuzzles = allGrids.length;
     const numPuzzlesPerRow = Math.floor(width / (puzzleWidth + margin));
+    const numPuzzlesPerCol = Math.floor(height / (puzzleHeight + margin));
+    const numPuzzlesPerPage = numPuzzlesPerRow * numPuzzlesPerCol;
 
     for (let i = 0; i < numPuzzles; i++) {
-        const pdfRow = Math.floor(i / numPuzzlesPerRow);
-        const pdfCol = i % numPuzzlesPerRow;
+        const pdfRow = Math.floor(i / numPuzzlesPerRow) % numPuzzlesPerCol;
+        const pdfCol = (i % numPuzzlesPerRow) % numPuzzlesPerRow;
+
+        if (i > 0 && i % numPuzzlesPerPage === 0) {
+            pdfPuzzle.addPage();
+            pdfSolution.addPage();
+        }
 
         const grid = allGrids[i];
         const filledGrid = allFilledGrids[i];
@@ -408,7 +415,7 @@ function exportPDFa4() {
                 const x = pdfCol * (puzzleWidth + margin) + col * spacing + margin;
                 const y = pdfRow * (puzzleHeight + margin) + row * spacing + margin;
                 pdfPuzzle.text(text, x, y);
-                pdfSolution.text(text, x, y).setFont(font, grid[row][col] ? 'bold' : 'normal');
+                pdfSolution.setFont(font, grid[row][col] ? 'bold' : 'normal').text(text, x, y);
             }
         }
     }
