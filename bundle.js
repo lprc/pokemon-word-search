@@ -1074,10 +1074,13 @@ window.addEventListener("DOMContentLoaded", function (event) {
     document.getElementById('dir8').checked = false;
   };
   document.getElementById('btnDownloadPdf').onclick = function () {
-    let svgElement = document.getElementById('svgContainer').firstElementChild;
-    let svgElementSolution = document.getElementById('svgContainerSolution').firstElementChild;
-    exportPDF(svgElement, "puzzle");
-    exportPDF(svgElementSolution, "solution");
+    const numberOfPuzzles = document.getElementById('numPuzzles').value;
+    for (let i = 0; i < numberOfPuzzles; i++) {
+      let svgElement = document.getElementById(`svg-puzzle-${i}`).firstElementChild;
+      let svgElementSolution = document.getElementById(`svg-solution-${i}`).firstElementChild;
+      exportPDF(svgElement, `puzzle-${i}`);
+      exportPDF(svgElementSolution, `solution-${i}`);
+    }
   };
   document.getElementById('btnDownloadSvg').onclick = function () {
     const numberOfPuzzles = document.getElementById('numPuzzles').value;
