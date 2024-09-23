@@ -1170,7 +1170,8 @@ function onGenerate() {
   }
   for (let i = 0; i < numberOfPuzzles; i++) {
     let grid = generatePuzzle(pokemon_filtered, dirs);
-    generateSVG(grid, i);
+    let filledGrid = copyAndFillGrid(grid);
+    generateSVG(grid, filledGrid, i);
   }
 }
 function generatePuzzle(inputWords, dirs) {
@@ -1287,14 +1288,13 @@ function placeWord(grid, word, row, col, direction) {
     }
   }
 }
-function generateSVG(grid, svgNum) {
+function generateSVG(grid, filledGrid, svgNum) {
   let svgContent = "";
   let svgContentSolution = "";
   for (let row = 0; row < gridSize; row++) {
     for (let col = 0; col < gridSize; col++) {
-      let rngChar = String.fromCharCode(65 + Math.floor(Math.random() * 26));
-      svgContent += `<text x="${col * 15 + 5}" y="${row * 15 + 15}" text-anchor="middle" fill="black">${grid[row][col] ? grid[row][col].toUpperCase() : rngChar}</text>`;
-      svgContentSolution += `<text x="${col * 15 + 5}" y="${row * 15 + 15}" text-anchor="middle" fill="${grid[row][col] ? 'red' : 'black'}" font-weight="${grid[row][col] ? 'bold' : 'normal'}">${grid[row][col] ? grid[row][col].toUpperCase() : rngChar}</text>`;
+      svgContent += `<text x="${col * 15 + 5}" y="${row * 15 + 15}" text-anchor="middle" fill="black">${grid[row][col] ? grid[row][col].toUpperCase() : filledGrid[row][col].toUpperCase()}</text>`;
+      svgContentSolution += `<text x="${col * 15 + 5}" y="${row * 15 + 15}" text-anchor="middle" fill="${grid[row][col] ? 'red' : 'black'}" font-weight="${grid[row][col] ? 'bold' : 'normal'}">${grid[row][col] ? grid[row][col].toUpperCase() : filledGrid[row][col].toUpperCase()}</text>`;
     }
   }
   // svgContent += `</svg>`;
@@ -1341,6 +1341,23 @@ function exportPDF(svgElement, name) {
   });
 }
 
+// export all in one a4 pdf
+function exportPDFa4(grid, name) {
+  svgElement.getBoundingClientRect(); // force layout calculation
+  const width = svgElement.width.baseVal.value;
+  const height = svgElement.height.baseVal.value + 5;
+  const pdf = new jsPDF(width > height ? 'l' : 'p', 'pt', [width, height]);
+  // const pdf = new jsPDF('p', 'pt', "a4");
+
+  pdf.svg(svgElement, {
+    width,
+    height
+  }).then(() => {
+    // save the created pdf
+    pdf.save(`${name}.pdf`);
+  });
+}
+
 // Reverse a string
 function reverse(s) {
   return s.split("").reverse().join("");
@@ -1354,6 +1371,28 @@ function dirToStr(dir) {
   if (dir === DIR.BRTL) return "BRTL";
   if (dir === DIR.BLTR) return "BLTR";
   if (dir === DIR.TRBL) return "TRBL";
+}
+
+// fills empty places in grid with random chars
+function copyAndFillGrid(grid) {
+  var newGrid = copyGrid(grid);
+  for (let row = 0; row < gridSize; row++) {
+    for (let col = 0; col < gridSize; col++) {
+      if (newGrid[row][col] === '') newGrid[row][col] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+    }
+  }
+  return newGrid;
+}
+function copyGrid(grid) {
+  var newGrid = Array.from({
+    length: gridSize
+  }, () => Array(gridSize).fill(''));
+  for (let row = 0; row < gridSize; row++) {
+    for (let col = 0; col < gridSize; col++) {
+      newGrid[row][col] = grid[row][col];
+    }
+  }
+  return newGrid;
 }
 
 },{"./data/pokemons.de.js":1,"./data/pokemons.en.js":2,"jspdf":9,"svg2pdf.js":11}],4:[function(require,module,exports){
