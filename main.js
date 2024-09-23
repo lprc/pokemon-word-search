@@ -224,7 +224,6 @@ function generatePuzzle(inputWords, dirs) {
     }
 
     return grid;
-    // generatePDF();
 }
 
 function canPlaceWord(grid, word, row, col, direction) {
@@ -332,8 +331,6 @@ function generateSVG(grid, filledGrid, svgNum) {
             svgContentSolution += `<text x="${col * 15 + 5}" y="${row * 15 + 15}" text-anchor="middle" fill="${grid[row][col] ? 'red' : 'black'}" font-weight="${grid[row][col] ? 'bold' : 'normal'}">${grid[row][col] ? grid[row][col].toUpperCase() : filledGrid[row][col].toUpperCase()}</text>`;
         }
     }
-    // svgContent += `</svg>`;
-    // svgContentSolution += `</svg>`;
 
     const svgContainer1 = document.createElement('div');
     svgContainer1.classList.add('svg-container');
@@ -397,7 +394,6 @@ function exportPDFa4() {
 
     const numPuzzles = allGrids.length;
     const numPuzzlesPerRow = Math.floor(width / (puzzleWidth + margin));
-    const numPuzzlesPerColumn = Math.floor(height / (puzzleHeight + margin));
 
     for (let i = 0; i < numPuzzles; i++) {
         const pdfRow = Math.floor(i / numPuzzlesPerRow);
