@@ -21,6 +21,9 @@ const DIR = Object.freeze({
 const gridSize = 20;
 const retries = 50; // number of retries to place a pokemon
 
+var allGrids = [];
+var allFilledGrids = [];
+
 window.addEventListener("DOMContentLoaded", function (event) {
     document.getElementById('btnGenerate').onclick = onGenerate;
 
@@ -56,6 +59,10 @@ window.addEventListener("DOMContentLoaded", function (event) {
         }
     };
 
+    document.getElementById('btnDownloadPdfSingle').onclick = function () {
+        exportPDFa4();
+    };
+
     document.getElementById('btnDownloadSvg').onclick = function () {
         const numberOfPuzzles = document.getElementById('numPuzzles').value;
         for (let i = 0; i < numberOfPuzzles; i++) {
@@ -80,6 +87,8 @@ window.addEventListener("DOMContentLoaded", function (event) {
 function onGenerate() {
     document.getElementById('puzzles-container').innerHTML = "";
     document.getElementById('solutions-container').innerHTML = "";
+    allGrids = [];
+    allFilledGrids = [];
 
     const dir1 = document.getElementById('dir1').checked;
     const dir2 = document.getElementById('dir2').checked;
@@ -174,6 +183,10 @@ function onGenerate() {
     for (let i = 0; i < numberOfPuzzles; i++) {
         let grid = generatePuzzle(pokemon_filtered, dirs);
         let filledGrid = copyAndFillGrid(grid);
+
+        allGrids.push(grid);
+        allFilledGrids.push(filledGrid);
+
         generateSVG(grid, filledGrid, i);
     }
 }
@@ -362,19 +375,51 @@ function exportPDF(svgElement, name) {
         })
 }
 
-// export all in one a4 pdf
-function exportPDFa4(grid, name) {
-    svgElement.getBoundingClientRect(); // force layout calculation
-    const width = svgElement.width.baseVal.value;
-    const height = svgElement.height.baseVal.value + 5;
-    const pdf = new jsPDF(width > height ? 'l' : 'p', 'pt', [width, height])
-    // const pdf = new jsPDF('p', 'pt', "a4");
+// export all in one a4 pdf from global variables allGrids and allFilledGrids
+function exportPDFa4() {
+    const fontSize = 12;
+    const font = "Courier";
 
-    pdf.svg(svgElement, { width, height })
-        .then(() => {
-            // save the created pdf
-            pdf.save(`${name}.pdf`)
-        })
+    const pdfPuzzle = new jsPDF('p', 'pt', "a4");
+    const width = pdfPuzzle.internal.pageSize.getWidth();
+    const height = pdfPuzzle.internal.pageSize.getHeight();
+    pdfPuzzle.setFont(font);
+    pdfPuzzle.setFontSize(fontSize);
+
+    const pdfSolution = new jsPDF('p', 'pt', "a4");
+    pdfSolution.setFont(font);
+    pdfSolution.setFontSize(fontSize);
+
+    const margin = 12;
+    const spacing = 12;
+    const puzzleWidth = gridSize * spacing;
+    const puzzleHeight = gridSize * spacing;
+
+    const numPuzzles = allGrids.length;
+    const numPuzzlesPerRow = Math.floor(width / (puzzleWidth + margin));
+    const numPuzzlesPerColumn = Math.floor(height / (puzzleHeight + margin));
+
+    for (let i = 0; i < numPuzzles; i++) {
+        const pdfRow = Math.floor(i / numPuzzlesPerRow);
+        const pdfCol = i % numPuzzlesPerRow;
+
+        const grid = allGrids[i];
+        const filledGrid = allFilledGrids[i];
+
+        for (let row = 0; row < gridSize; row++) {
+            for (let col = 0; col < gridSize; col++) {
+                const text = grid[row][col] ? grid[row][col].toUpperCase() : filledGrid[row][col].toUpperCase();
+                const x = pdfCol * (puzzleWidth + margin) + col * spacing + margin;
+                const y = pdfRow * (puzzleHeight + margin) + row * spacing + margin;
+                pdfPuzzle.text(text, x, y);
+                pdfSolution.text(text, x, y).setFont(font, grid[row][col] ? 'bold' : 'normal');
+            }
+        }
+    }
+
+    pdfPuzzle.save(`puzzle.pdf`);
+    pdfSolution.save(`solution.pdf`);
+
 }
 
 // Reverse a string
