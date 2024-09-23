@@ -181,10 +181,12 @@ function onGenerate() {
     }
 
     for (let i = 0; i < numberOfPuzzles; i++) {
-        let grid = generatePuzzle(pokemon_filtered, dirs);
+        let grid_and_num = generatePuzzle(pokemon_filtered, dirs);
+        let grid = grid_and_num.grid;
+        let numPlacedPokemons = grid_and_num.numPokemons;
         let filledGrid = copyAndFillGrid(grid);
 
-        allGrids.push(grid);
+        allGrids.push(grid_and_num);
         allFilledGrids.push(filledGrid);
 
         generateSVG(grid, filledGrid, i);
@@ -193,6 +195,7 @@ function onGenerate() {
 
 function generatePuzzle(inputWords, dirs) {
     var grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(''));
+    let numPlacedPokemons = 0;
     for (const word of inputWords) {
         let placed = false;
         let dir = dirs[Math.floor(Math.random() * dirs.length)];
@@ -205,6 +208,7 @@ function generatePuzzle(inputWords, dirs) {
             if (canPlaceWord(grid, word, startRow, startCol, dir)) {
                 placeWord(grid, word, startRow, startCol, dir);
                 placed = true;
+                numPlacedPokemons++;
                 if (DEBUG) {
                     console.log(`word '${word}' placed at [${startRow}, ${startCol}] with direction '${dirToStr(dir)}'`);
                 }
@@ -223,7 +227,7 @@ function generatePuzzle(inputWords, dirs) {
         console.table(grid);
     }
 
-    return grid;
+    return { grid: grid, numPokemons: numPlacedPokemons };
 }
 
 function canPlaceWord(grid, word, row, col, direction) {
@@ -391,10 +395,11 @@ function exportPDFa4() {
     const spacing = 12;
     const puzzleWidth = gridSize * spacing;
     const puzzleHeight = gridSize * spacing;
+    const puzzleHeightWithNumPokemons = puzzleHeight + 10;
 
     const numPuzzles = allGrids.length;
     const numPuzzlesPerRow = Math.floor(width / (puzzleWidth + margin));
-    const numPuzzlesPerCol = Math.floor(height / (puzzleHeight + margin));
+    const numPuzzlesPerCol = Math.floor(height / (puzzleHeightWithNumPokemons + margin));
     const numPuzzlesPerPage = numPuzzlesPerRow * numPuzzlesPerCol;
 
     for (let i = 0; i < numPuzzles; i++) {
@@ -406,18 +411,25 @@ function exportPDFa4() {
             pdfSolution.addPage();
         }
 
-        const grid = allGrids[i];
+        const grid = allGrids[i].grid;
+        const numPokemons = allGrids[i].numPokemons;
         const filledGrid = allFilledGrids[i];
 
         for (let row = 0; row < gridSize; row++) {
             for (let col = 0; col < gridSize; col++) {
                 const text = grid[row][col] ? grid[row][col].toUpperCase() : filledGrid[row][col].toUpperCase();
                 const x = pdfCol * (puzzleWidth + margin) + col * spacing + margin;
-                const y = pdfRow * (puzzleHeight + margin) + row * spacing + margin;
+                const y = pdfRow * (puzzleHeightWithNumPokemons + margin) + row * spacing + margin;
                 pdfPuzzle.text(text, x, y);
                 pdfSolution.setFont(font, grid[row][col] ? 'bold' : 'normal').text(text, x, y);
             }
         }
+
+        const x = pdfCol * (puzzleWidth + margin) + 0 * spacing + margin;
+        const y = pdfRow * (puzzleHeightWithNumPokemons + margin) + gridSize * spacing + margin;
+        const text = `Number of Pokemons: ${numPokemons}`;
+        pdfPuzzle.text(text, x, y);
+        pdfSolution.setFont(font, 'normal').text(text, x, y);
     }
 
     pdfPuzzle.save(`puzzle.pdf`);
