@@ -1079,6 +1079,22 @@ window.addEventListener("DOMContentLoaded", function (event) {
     exportPDF(svgElement, "puzzle");
     exportPDF(svgElementSolution, "solution");
   };
+  document.getElementById('btnDownloadSvg').onclick = function () {
+    const numberOfPuzzles = document.getElementById('numPuzzles').value;
+    for (let i = 0; i < numberOfPuzzles; i++) {
+      let svgElement = document.getElementById(`svg-puzzle-${i}`).firstElementChild;
+      let svgElementSolution = document.getElementById(`svg-solution-${i}`).firstElementChild;
+      let svgString = new XMLSerializer().serializeToString(svgElement);
+      let a = document.createElement('a');
+      a.href = 'data:image/svg+xml,' + encodeURIComponent(svgString);
+      a.download = `puzzle-${i}.svg`;
+      a.click();
+      svgString = new XMLSerializer().serializeToString(svgElementSolution);
+      a.href = 'data:image/svg+xml,' + encodeURIComponent(svgString);
+      a.download = `solution-${i}.svg`;
+      a.click();
+    }
+  };
 });
 
 // callback for submit
@@ -1151,7 +1167,7 @@ function onGenerate() {
   }
   for (let i = 0; i < numberOfPuzzles; i++) {
     let grid = generatePuzzle(pokemon_filtered, dirs);
-    generateSVG(grid);
+    generateSVG(grid, i);
   }
 }
 function generatePuzzle(inputWords, dirs) {
@@ -1268,7 +1284,7 @@ function placeWord(grid, word, row, col, direction) {
     }
   }
 }
-function generateSVG(grid) {
+function generateSVG(grid, svgNum) {
   let svgContent = "";
   let svgContentSolution = "";
   for (let row = 0; row < gridSize; row++) {
@@ -1283,6 +1299,7 @@ function generateSVG(grid) {
 
   const svgContainer1 = document.createElement('div');
   svgContainer1.classList.add('svg-container');
+  svgContainer1.setAttribute('id', `svg-puzzle-${svgNum}`);
   const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svgElement.setAttribute('width', gridSize * 15);
   svgElement.setAttribute('height', gridSize * 15);
@@ -1293,6 +1310,7 @@ function generateSVG(grid) {
   document.getElementById('puzzles-container').appendChild(svgContainer1);
   const svgContainer2 = document.createElement('div');
   svgContainer2.classList.add('svg-container');
+  svgContainer2.setAttribute('id', `svg-solution-${svgNum}`);
   const svgElementSolution = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svgElementSolution.setAttribute('width', gridSize * 15);
   svgElementSolution.setAttribute('height', gridSize * 15);
