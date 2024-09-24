@@ -336,14 +336,17 @@ function generateSVG(grid, filledGrid, svgNum) {
         }
     }
 
+    const fontSize = document.getElementById('fontSize').value || 12;
+    const font = document.getElementById('font').value || "Courier";
+
     const svgContainer1 = document.createElement('div');
     svgContainer1.classList.add('svg-container');
     svgContainer1.setAttribute('id', `svg-puzzle-${svgNum}`);
     const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svgElement.setAttribute('width', gridSize * 15);
     svgElement.setAttribute('height', gridSize * 15);
-    svgElement.setAttribute('font-size', '16');
-    svgElement.setAttribute('font-family', 'monospace');
+    svgElement.setAttribute('font-size', fontSize);
+    svgElement.setAttribute('font-family', font);
     svgElement.innerHTML = svgContent;
     svgContainer1.appendChild(svgElement);
     document.getElementById('puzzles-container').appendChild(svgContainer1);
@@ -354,8 +357,8 @@ function generateSVG(grid, filledGrid, svgNum) {
     const svgElementSolution = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svgElementSolution.setAttribute('width', gridSize * 15);
     svgElementSolution.setAttribute('height', gridSize * 15);
-    svgElementSolution.setAttribute('font-size', '16');
-    svgElementSolution.setAttribute('font-family', 'monospace');
+    svgElementSolution.setAttribute('font-size', fontSize);
+    svgElementSolution.setAttribute('font-family', font);
     svgElementSolution.innerHTML = svgContentSolution;
     svgContainer2.appendChild(svgElementSolution);
     document.getElementById('solutions-container').appendChild(svgContainer2);
@@ -378,8 +381,8 @@ function exportPDF(svgElement, name) {
 
 // export all in one a4 pdf from global variables allGrids and allFilledGrids
 function exportPDFa4() {
-    const fontSize = 12;
-    const font = "Courier";
+    const fontSize = document.getElementById('fontSize').value || 12;
+    const font = document.getElementById('font').value || "Courier";
 
     const pdfPuzzle = new jsPDF('p', 'pt', "a4");
     const width = pdfPuzzle.internal.pageSize.getWidth();
@@ -420,8 +423,8 @@ function exportPDFa4() {
                 const text = grid[row][col] ? grid[row][col].toUpperCase() : filledGrid[row][col].toUpperCase();
                 const x = pdfCol * (puzzleWidth + margin) + col * spacing + margin;
                 const y = pdfRow * (puzzleHeightWithNumPokemons + margin) + row * spacing + margin;
-                pdfPuzzle.text(text, x, y);
-                pdfSolution.setFont(font, grid[row][col] ? 'bold' : 'normal').text(text, x, y);
+                pdfPuzzle.text(text, x, y, 'center');
+                pdfSolution.setFont(font, grid[row][col] ? 'bold' : 'normal').text(text, x, y, 'center');
             }
         }
 

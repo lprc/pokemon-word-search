@@ -52,6 +52,17 @@
     <input type="number" name="numPokemons" id="numPokemons" min="1" max="30" value="20" required>
     </div>
 
+    <div class="container">
+        <h2>PDF Options</h2>
+        <label>Font
+            Size: <input type="number" name="fontSize" id="fontSize" min="6" max="20" value="10" required></label><br>
+        <label>Font: <select name="font" id="font">
+                <option value="Courier" selected>Courier</option>
+                <option value="Helvetica">Helvetica</option>
+                <option value="Times">Times</option>
+            </select></label>
+    </div>
+
     <br />
     <br />
     <button id="btnGenerate">Generate</button>
