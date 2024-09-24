@@ -1369,6 +1369,9 @@ function exportPDF(svgElement, name) {
 function exportPDFa4() {
   const fontSize = document.getElementById('fontSize').value || 12;
   const font = document.getElementById('font').value || "Courier";
+  const pageMargin = parseInt(document.getElementById('pageMargin').value) || 20;
+  const puzzleMargin = parseInt(document.getElementById('puzzleMargin').value) || 12;
+  const charSpacing = parseInt(document.getElementById('charSpacing').value) || 12;
   const pdfPuzzle = new jsPDF('p', 'pt', "a4");
   const width = pdfPuzzle.internal.pageSize.getWidth();
   const height = pdfPuzzle.internal.pageSize.getHeight();
@@ -1377,14 +1380,12 @@ function exportPDFa4() {
   const pdfSolution = new jsPDF('p', 'pt', "a4");
   pdfSolution.setFont(font);
   pdfSolution.setFontSize(fontSize);
-  const margin = 12;
-  const spacing = 12;
-  const puzzleWidth = gridSize * spacing;
-  const puzzleHeight = gridSize * spacing;
+  const puzzleWidth = gridSize * charSpacing;
+  const puzzleHeight = gridSize * charSpacing;
   const puzzleHeightWithNumPokemons = puzzleHeight + 10;
   const numPuzzles = allPuzzles.length;
-  const numPuzzlesPerRow = Math.floor(width / (puzzleWidth + margin));
-  const numPuzzlesPerCol = Math.floor(height / (puzzleHeightWithNumPokemons + margin));
+  const numPuzzlesPerRow = Math.floor(width / (puzzleWidth + puzzleMargin + pageMargin));
+  const numPuzzlesPerCol = Math.floor(height / (puzzleHeightWithNumPokemons + puzzleMargin + pageMargin));
   const numPuzzlesPerPage = numPuzzlesPerRow * numPuzzlesPerCol;
   for (let i = 0; i < numPuzzles; i++) {
     const pdfRow = Math.floor(i / numPuzzlesPerRow) % numPuzzlesPerCol;
@@ -1399,14 +1400,14 @@ function exportPDFa4() {
     for (let row = 0; row < gridSize; row++) {
       for (let col = 0; col < gridSize; col++) {
         const text = grid[row][col] ? grid[row][col].toUpperCase() : filledGrid[row][col].toUpperCase();
-        const x = pdfCol * (puzzleWidth + margin) + col * spacing + margin;
-        const y = pdfRow * (puzzleHeightWithNumPokemons + margin) + row * spacing + margin;
+        const x = pdfCol * (puzzleWidth + puzzleMargin) + col * charSpacing + pageMargin;
+        const y = pdfRow * (puzzleHeightWithNumPokemons + puzzleMargin) + row * charSpacing + pageMargin;
         pdfPuzzle.text(text, x, y, 'center');
         pdfSolution.setFont(font, grid[row][col] ? 'bold' : 'normal').text(text, x, y, 'center');
       }
     }
-    const x = pdfCol * (puzzleWidth + margin) + 0 * spacing + margin;
-    const y = pdfRow * (puzzleHeightWithNumPokemons + margin) + gridSize * spacing + margin;
+    const x = pdfCol * (puzzleWidth + puzzleMargin) + 0 * charSpacing + pageMargin;
+    const y = pdfRow * (puzzleHeightWithNumPokemons + puzzleMargin) + gridSize * charSpacing + pageMargin;
     const text = `Number of Pokemons: ${numPokemons}`;
     pdfPuzzle.text(text, x, y);
     pdfSolution.setFont(font, 'normal').text(text, x, y);
