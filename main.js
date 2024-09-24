@@ -18,11 +18,24 @@ const DIR = Object.freeze({
     BLTR: 7
 });
 
+class Puzzle {
+    constructor(grid, gridSolutions, pokemonsToFind, width, height, directions) {
+        this.grid = grid;
+        this.gridSolutions = gridSolutions;
+        this.pokemonsToFind = pokemonsToFind;
+        this.numPokemons = pokemonsToFind.length;
+        this.width = width;
+        this.height = height;
+        this.directions = directions;
+    }
+}
+
 const gridSize = 20;
 const retries = 50; // number of retries to place a pokemon
 
-var allGrids = [];
-var allFilledGrids = [];
+// var allGrids = [];
+// var allFilledGrids = [];
+var allPuzzles = [];
 
 window.addEventListener("DOMContentLoaded", function (event) {
     document.getElementById('btnGenerate').onclick = onGenerate;
@@ -87,8 +100,9 @@ window.addEventListener("DOMContentLoaded", function (event) {
 function onGenerate() {
     document.getElementById('puzzles-container').innerHTML = "";
     document.getElementById('solutions-container').innerHTML = "";
-    allGrids = [];
-    allFilledGrids = [];
+    // allGrids = [];
+    // allFilledGrids = [];
+    allPuzzles = [];
 
     const dir1 = document.getElementById('dir1').checked;
     const dir2 = document.getElementById('dir2').checked;
@@ -181,21 +195,19 @@ function onGenerate() {
             }
         }
 
-        let grid_and_num = generatePuzzle(pokemon_filtered, dirs);
-        let grid = grid_and_num.grid;
-        let numPlacedPokemons = grid_and_num.numPokemons;
-        let filledGrid = copyAndFillGrid(grid);
+        let puzzle = generatePuzzle(pokemon_filtered, dirs);
 
-        allGrids.push(grid_and_num);
-        allFilledGrids.push(filledGrid);
+        // allGrids.push(grid_and_num);
+        // allFilledGrids.push(filledGrid);
+        allPuzzles.push(puzzle);
 
-        generateSVG(grid, filledGrid, i);
+        generateSVG(puzzle, i);
     }
 }
 
 function generatePuzzle(inputWords, dirs) {
     var grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(''));
-    let numPlacedPokemons = 0;
+    let pokemonsToFind = [];
     for (const word of inputWords) {
         let placed = false;
         let dir = dirs[Math.floor(Math.random() * dirs.length)];
@@ -208,7 +220,7 @@ function generatePuzzle(inputWords, dirs) {
             if (canPlaceWord(grid, word, startRow, startCol, dir)) {
                 placeWord(grid, word, startRow, startCol, dir);
                 placed = true;
-                numPlacedPokemons++;
+                pokemonsToFind.push(word);
                 if (DEBUG) {
                     console.log(`word '${word}' placed at [${startRow}, ${startCol}] with direction '${dirToStr(dir)}'`);
                 }
@@ -227,7 +239,8 @@ function generatePuzzle(inputWords, dirs) {
         console.table(grid);
     }
 
-    return { grid: grid, numPokemons: numPlacedPokemons };
+    let filledGrid = copyAndFillGrid(grid);
+    return new Puzzle(filledGrid, grid, pokemonsToFind, gridSize, gridSize, dirs);
 }
 
 function canPlaceWord(grid, word, row, col, direction) {
@@ -325,7 +338,9 @@ function placeWord(grid, word, row, col, direction) {
     }
 }
 
-function generateSVG(grid, filledGrid, svgNum) {
+function generateSVG(puzzle, svgNum) {
+    let grid = puzzle.gridSolutions;
+    let filledGrid = puzzle.grid;
     let svgContent = "";
     let svgContentSolution = "";
 
@@ -400,7 +415,7 @@ function exportPDFa4() {
     const puzzleHeight = gridSize * spacing;
     const puzzleHeightWithNumPokemons = puzzleHeight + 10;
 
-    const numPuzzles = allGrids.length;
+    const numPuzzles = allPuzzles.length;
     const numPuzzlesPerRow = Math.floor(width / (puzzleWidth + margin));
     const numPuzzlesPerCol = Math.floor(height / (puzzleHeightWithNumPokemons + margin));
     const numPuzzlesPerPage = numPuzzlesPerRow * numPuzzlesPerCol;
@@ -414,9 +429,9 @@ function exportPDFa4() {
             pdfSolution.addPage();
         }
 
-        const grid = allGrids[i].grid;
-        const numPokemons = allGrids[i].numPokemons;
-        const filledGrid = allFilledGrids[i];
+        const grid = allPuzzles[i].gridSolutions;
+        const numPokemons = allPuzzles[i].numPokemons;
+        const filledGrid = allPuzzles[i].grid;
 
         for (let row = 0; row < gridSize; row++) {
             for (let col = 0; col < gridSize; col++) {

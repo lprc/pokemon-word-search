@@ -1048,11 +1048,23 @@ const DIR = Object.freeze({
   TRBL: 6,
   BLTR: 7
 });
+class Puzzle {
+  constructor(grid, gridSolutions, pokemonsToFind, width, height, directions) {
+    this.grid = grid;
+    this.gridSolutions = gridSolutions;
+    this.pokemonsToFind = pokemonsToFind;
+    this.numPokemons = pokemonsToFind.length;
+    this.width = width;
+    this.height = height;
+    this.directions = directions;
+  }
+}
 const gridSize = 20;
 const retries = 50; // number of retries to place a pokemon
 
-var allGrids = [];
-var allFilledGrids = [];
+// var allGrids = [];
+// var allFilledGrids = [];
+var allPuzzles = [];
 window.addEventListener("DOMContentLoaded", function (event) {
   document.getElementById('btnGenerate').onclick = onGenerate;
   document.getElementById('btnAllDirs').onclick = function () {
@@ -1109,8 +1121,9 @@ window.addEventListener("DOMContentLoaded", function (event) {
 function onGenerate() {
   document.getElementById('puzzles-container').innerHTML = "";
   document.getElementById('solutions-container').innerHTML = "";
-  allGrids = [];
-  allFilledGrids = [];
+  // allGrids = [];
+  // allFilledGrids = [];
+  allPuzzles = [];
   const dir1 = document.getElementById('dir1').checked;
   const dir2 = document.getElementById('dir2').checked;
   const dir3 = document.getElementById('dir3').checked;
@@ -1144,16 +1157,6 @@ function onGenerate() {
   } else {
     pokemons = pokemons.concat(gen1 ? pokemons_en[0] : [], gen2 ? pokemons_en[1] : [], gen3 ? pokemons_en[2] : [], gen4 ? pokemons_en[3] : []);
   }
-
-  // take random entries from pokemons
-  const pokemon_filtered = [];
-  while (pokemon_filtered.length < numberOfPokemons) {
-    const randomIndex = Math.floor(Math.random() * pokemons.length);
-    const randomPokemon = pokemons.splice(randomIndex, 1)[0];
-    if (!randomPokemon.length <= gridSize && !pokemon_filtered.includes(randomPokemon)) {
-      pokemon_filtered.push(randomPokemon);
-    }
-  }
   if (DEBUG) {
     console.log("dir1: " + dir1);
     console.log("dir2: " + dir2);
@@ -1172,24 +1175,31 @@ function onGenerate() {
     console.log("number of pokemons: " + numberOfPokemons);
     console.log("number of puzzles: " + numberOfPuzzles);
     console.log("first pokemon: " + pokemons[0]);
-    console.log("pokemons: " + pokemon_filtered);
     console.log("dirs: " + dirs.map(dirToStr));
   }
   for (let i = 0; i < numberOfPuzzles; i++) {
-    let grid_and_num = generatePuzzle(pokemon_filtered, dirs);
-    let grid = grid_and_num.grid;
-    let numPlacedPokemons = grid_and_num.numPokemons;
-    let filledGrid = copyAndFillGrid(grid);
-    allGrids.push(grid_and_num);
-    allFilledGrids.push(filledGrid);
-    generateSVG(grid, filledGrid, i);
+    // take random entries from pokemons
+    const pokemon_filtered = [];
+    while (pokemon_filtered.length < numberOfPokemons) {
+      const randomIndex = Math.floor(Math.random() * pokemons.length);
+      const randomPokemon = pokemons.splice(randomIndex, 1)[0];
+      if (!randomPokemon.length <= gridSize && !pokemon_filtered.includes(randomPokemon)) {
+        pokemon_filtered.push(randomPokemon);
+      }
+    }
+    let puzzle = generatePuzzle(pokemon_filtered, dirs);
+
+    // allGrids.push(grid_and_num);
+    // allFilledGrids.push(filledGrid);
+    allPuzzles.push(puzzle);
+    generateSVG(puzzle, i);
   }
 }
 function generatePuzzle(inputWords, dirs) {
   var grid = Array.from({
     length: gridSize
   }, () => Array(gridSize).fill(''));
-  let numPlacedPokemons = 0;
+  let pokemonsToFind = [];
   for (const word of inputWords) {
     let placed = false;
     let dir = dirs[Math.floor(Math.random() * dirs.length)];
@@ -1200,7 +1210,7 @@ function generatePuzzle(inputWords, dirs) {
       if (canPlaceWord(grid, word, startRow, startCol, dir)) {
         placeWord(grid, word, startRow, startCol, dir);
         placed = true;
-        numPlacedPokemons++;
+        pokemonsToFind.push(word);
         if (DEBUG) {
           console.log(`word '${word}' placed at [${startRow}, ${startCol}] with direction '${dirToStr(dir)}'`);
         }
@@ -1215,10 +1225,8 @@ function generatePuzzle(inputWords, dirs) {
     console.log("grid: ");
     console.table(grid);
   }
-  return {
-    grid: grid,
-    numPokemons: numPlacedPokemons
-  };
+  let filledGrid = copyAndFillGrid(grid);
+  return new Puzzle(filledGrid, grid, pokemonsToFind, gridSize, gridSize, dirs);
 }
 function canPlaceWord(grid, word, row, col, direction) {
   if (direction === DIR.LR) {
@@ -1303,7 +1311,9 @@ function placeWord(grid, word, row, col, direction) {
     }
   }
 }
-function generateSVG(grid, filledGrid, svgNum) {
+function generateSVG(puzzle, svgNum) {
+  let grid = puzzle.gridSolutions;
+  let filledGrid = puzzle.grid;
   let svgContent = "";
   let svgContentSolution = "";
   for (let row = 0; row < gridSize; row++) {
@@ -1372,7 +1382,7 @@ function exportPDFa4() {
   const puzzleWidth = gridSize * spacing;
   const puzzleHeight = gridSize * spacing;
   const puzzleHeightWithNumPokemons = puzzleHeight + 10;
-  const numPuzzles = allGrids.length;
+  const numPuzzles = allPuzzles.length;
   const numPuzzlesPerRow = Math.floor(width / (puzzleWidth + margin));
   const numPuzzlesPerCol = Math.floor(height / (puzzleHeightWithNumPokemons + margin));
   const numPuzzlesPerPage = numPuzzlesPerRow * numPuzzlesPerCol;
@@ -1383,9 +1393,9 @@ function exportPDFa4() {
       pdfPuzzle.addPage();
       pdfSolution.addPage();
     }
-    const grid = allGrids[i].grid;
-    const numPokemons = allGrids[i].numPokemons;
-    const filledGrid = allFilledGrids[i];
+    const grid = allPuzzles[i].gridSolutions;
+    const numPokemons = allPuzzles[i].numPokemons;
+    const filledGrid = allPuzzles[i].grid;
     for (let row = 0; row < gridSize; row++) {
       for (let col = 0; col < gridSize; col++) {
         const text = grid[row][col] ? grid[row][col].toUpperCase() : filledGrid[row][col].toUpperCase();
