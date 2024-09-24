@@ -36,6 +36,8 @@ const retries = 50; // number of retries to place a pokemon
 // var allGrids = [];
 // var allFilledGrids = [];
 var allPuzzles = [];
+var pdfa4Puzzles;
+var pdfa4Solutions;
 
 window.addEventListener("DOMContentLoaded", function (event) {
     document.getElementById('btnGenerate').onclick = onGenerate;
@@ -73,7 +75,7 @@ window.addEventListener("DOMContentLoaded", function (event) {
     };
 
     document.getElementById('btnDownloadPdfSingle').onclick = function () {
-        exportPDFa4();
+        savePDFa4();
     };
 
     document.getElementById('btnDownloadSvg').onclick = function () {
@@ -94,6 +96,12 @@ window.addEventListener("DOMContentLoaded", function (event) {
             a.click();
         }
     };
+
+    document.getElementById('fontSize').onchange = updatePDFa4;
+    document.getElementById('font').onchange = updatePDFa4;
+    document.getElementById('pageMargin').onchange = updatePDFa4;
+    document.getElementById('puzzleMargin').onchange = updatePDFa4;
+    document.getElementById('charSpacing').onchange = updatePDFa4;
 });
 
 // callback for submit
@@ -203,6 +211,8 @@ function onGenerate() {
 
         generateSVG(puzzle, i);
     }
+    generatePDFa4();
+    previewPDFa4();
 }
 
 function generatePuzzle(inputWords, dirs) {
@@ -395,22 +405,22 @@ function exportPDF(svgElement, name) {
 }
 
 // export all in one a4 pdf from global variables allGrids and allFilledGrids
-function exportPDFa4() {
+function generatePDFa4() {
     const fontSize = document.getElementById('fontSize').value || 12;
     const font = document.getElementById('font').value || "Courier";
     const pageMargin = parseInt(document.getElementById('pageMargin').value) || 20;
     const puzzleMargin = parseInt(document.getElementById('puzzleMargin').value) || 12;
     const charSpacing = parseInt(document.getElementById('charSpacing').value) || 12;
 
-    const pdfPuzzle = new jsPDF('p', 'pt', "a4");
-    const width = pdfPuzzle.internal.pageSize.getWidth();
-    const height = pdfPuzzle.internal.pageSize.getHeight();
-    pdfPuzzle.setFont(font);
-    pdfPuzzle.setFontSize(fontSize);
+    pdfa4Puzzles = new jsPDF('p', 'pt', "a4");
+    const width = pdfa4Puzzles.internal.pageSize.getWidth();
+    const height = pdfa4Puzzles.internal.pageSize.getHeight();
+    pdfa4Puzzles.setFont(font);
+    pdfa4Puzzles.setFontSize(fontSize);
 
-    const pdfSolution = new jsPDF('p', 'pt', "a4");
-    pdfSolution.setFont(font);
-    pdfSolution.setFontSize(fontSize);
+    pdfa4Solutions = new jsPDF('p', 'pt', "a4");
+    pdfa4Solutions.setFont(font);
+    pdfa4Solutions.setFontSize(fontSize);
 
     const puzzleWidth = gridSize * charSpacing;
     const puzzleHeight = gridSize * charSpacing;
@@ -426,8 +436,8 @@ function exportPDFa4() {
         const pdfCol = (i % numPuzzlesPerRow) % numPuzzlesPerRow;
 
         if (i > 0 && i % numPuzzlesPerPage === 0) {
-            pdfPuzzle.addPage();
-            pdfSolution.addPage();
+            pdfa4Puzzles.addPage();
+            pdfa4Solutions.addPage();
         }
 
         const grid = allPuzzles[i].gridSolutions;
@@ -439,21 +449,39 @@ function exportPDFa4() {
                 const text = grid[row][col] ? grid[row][col].toUpperCase() : filledGrid[row][col].toUpperCase();
                 const x = pdfCol * (puzzleWidth + puzzleMargin) + col * charSpacing + pageMargin;
                 const y = pdfRow * (puzzleHeightWithNumPokemons + puzzleMargin) + row * charSpacing + pageMargin;
-                pdfPuzzle.text(text, x, y, 'center');
-                pdfSolution.setFont(font, grid[row][col] ? 'bold' : 'normal').text(text, x, y, 'center');
+                pdfa4Puzzles.text(text, x, y, 'center');
+                pdfa4Solutions.setFont(font, grid[row][col] ? 'bold' : 'normal').text(text, x, y, 'center');
             }
         }
 
         const x = pdfCol * (puzzleWidth + puzzleMargin) + 0 * charSpacing + pageMargin;
         const y = pdfRow * (puzzleHeightWithNumPokemons + puzzleMargin) + gridSize * charSpacing + pageMargin;
         const text = `Number of Pokemons: ${numPokemons}`;
-        pdfPuzzle.text(text, x, y);
-        pdfSolution.setFont(font, 'normal').text(text, x, y);
+        pdfa4Puzzles.text(text, x, y);
+        pdfa4Solutions.setFont(font, 'normal').text(text, x, y);
     }
+}
 
-    pdfPuzzle.save(`puzzle.pdf`);
-    pdfSolution.save(`solution.pdf`);
+function previewPDFa4() {
+    if (pdfa4Puzzles && pdfa4Solutions) {
+        const puzzlesBlob = pdfa4Puzzles.output('blob');
+        const puzzlesUrl = URL.createObjectURL(puzzlesBlob);
+        const solutionsBlob = pdfa4Solutions.output('blob');
+        const solutionsUrl = URL.createObjectURL(solutionsBlob);
 
+        document.getElementById("pdf-frame-puzzles").src = puzzlesUrl;
+        document.getElementById("pdf-frame-solutions").src = solutionsUrl;
+    }
+}
+
+function updatePDFa4() {
+    generatePDFa4();
+    previewPDFa4();
+}
+
+function savePDFa4() {
+    pdfa4Puzzles.save(`puzzle.pdf`);
+    pdfa4Solutions.save(`solution.pdf`);
 }
 
 // Reverse a string

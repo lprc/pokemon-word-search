@@ -20,3 +20,9 @@ body {
 .svg-collection {
     display: flex;
 }
+
+.pdf-frame {
+    width: 45vw;
+    height: 320mm;
+    border: none;
+}
