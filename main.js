@@ -30,7 +30,9 @@ class Puzzle {
     }
 }
 
-const gridSize = 20;
+// const gridSize = 20;
+var gridWidth = 20;
+var gridHeight = 20;
 const retries = 50; // number of retries to place a pokemon
 
 // var allGrids = [];
@@ -108,9 +110,10 @@ window.addEventListener("DOMContentLoaded", function (event) {
 function onGenerate() {
     document.getElementById('puzzles-container').innerHTML = "";
     document.getElementById('solutions-container').innerHTML = "";
-    // allGrids = [];
-    // allFilledGrids = [];
     allPuzzles = [];
+
+    gridWidth = parseInt(document.getElementById('numRows').value);
+    gridHeight = parseInt(document.getElementById('numCols').value);
 
     const dir1 = document.getElementById('dir1').checked;
     const dir2 = document.getElementById('dir2').checked;
@@ -198,7 +201,7 @@ function onGenerate() {
         while (pokemon_filtered.length < numberOfPokemons) {
             const randomIndex = Math.floor(Math.random() * pokemons.length);
             const randomPokemon = pokemons.splice(randomIndex, 1)[0];
-            if (!randomPokemon.length <= gridSize && !pokemon_filtered.includes(randomPokemon)) {
+            if ((randomPokemon.length <= gridWidth || randomPokemon.length <= gridHeight) && !pokemon_filtered.includes(randomPokemon)) {
                 pokemon_filtered.push(randomPokemon);
             }
         }
@@ -216,7 +219,7 @@ function onGenerate() {
 }
 
 function generatePuzzle(inputWords, dirs) {
-    var grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(''));
+    var grid = Array.from({ length: gridHeight }, () => Array(gridWidth).fill(''));
     let pokemonsToFind = [];
     for (const word of inputWords) {
         let placed = false;
@@ -224,8 +227,8 @@ function generatePuzzle(inputWords, dirs) {
         let tryno = 0;
 
         while (!placed && tryno < retries) {
-            const startRow = Math.floor(Math.random() * gridSize);
-            const startCol = Math.floor(Math.random() * gridSize);
+            const startRow = Math.floor(Math.random() * gridHeight);
+            const startCol = Math.floor(Math.random() * gridWidth);
 
             if (canPlaceWord(grid, word, startRow, startCol, dir)) {
                 placeWord(grid, word, startRow, startCol, dir);
@@ -250,44 +253,44 @@ function generatePuzzle(inputWords, dirs) {
     }
 
     let filledGrid = copyAndFillGrid(grid);
-    return new Puzzle(filledGrid, grid, pokemonsToFind, gridSize, gridSize, dirs);
+    return new Puzzle(filledGrid, grid, pokemonsToFind, gridWidth, gridHeight, dirs);
 }
 
 function canPlaceWord(grid, word, row, col, direction) {
     if (direction === DIR.LR) {
-        if (col + word.length > gridSize) return false;
+        if (col + word.length > gridWidth) return false;
         for (let i = 0; i < word.length; i++) {
             if (grid[row][col + i] !== '' && grid[row][col + i] !== word[i]) return false;
         }
 
     } else if (direction === DIR.RL) {
         word = reverse(word);
-        if (col + word.length > gridSize) return false;
+        if (col + word.length > gridWidth) return false;
         for (let i = 0; i < word.length; i++) {
             if (grid[row][col + i] !== '' && grid[row][col + i] !== word[i]) return false;
         }
     }
     else if (direction === DIR.TB) {
-        if (row + word.length > gridSize) return false;
+        if (row + word.length > gridHeight) return false;
         for (let i = 0; i < word.length; i++) {
             if (grid[row + i][col] !== '' && grid[row + i][col] !== word[i]) return false;
         }
     }
     else if (direction === DIR.BT) {
         word = reverse(word);
-        if (row + word.length > gridSize) return false;
+        if (row + word.length > gridHeight) return false;
         for (let i = 0; i < word.length; i++) {
             if (grid[row + i][col] !== '' && grid[row + i][col] !== word[i]) return false;
         }
     } else if (direction === DIR.TLBR) {
         for (let i = 0; i < word.length; i++) {
-            if (row + i >= gridSize || col + i >= gridSize ||
+            if (row + i >= gridHeight || col + i >= gridWidth ||
                 (grid[row + i][col + i] !== '' && grid[row + i][col + i] !== word[i])) return false;
         }
     } else if (direction === DIR.BRTL) {
         word = reverse(word);
         for (let i = 0; i < word.length; i++) {
-            if (row + i >= gridSize || col + i >= gridSize ||
+            if (row + i >= gridHeight || col + i >= gridWidth ||
                 (grid[row + i][col + i] !== '' && grid[row + i][col + i] !== word[i])) return false;
         }
     } else if (direction === DIR.BLTR) {
@@ -354,8 +357,8 @@ function generateSVG(puzzle, svgNum) {
     let svgContent = "";
     let svgContentSolution = "";
 
-    for (let row = 0; row < gridSize; row++) {
-        for (let col = 0; col < gridSize; col++) {
+    for (let row = 0; row < gridHeight; row++) {
+        for (let col = 0; col < gridWidth; col++) {
             svgContent += `<text x="${col * 15 + 5}" y="${row * 15 + 15}" text-anchor="middle" fill="black">${grid[row][col] ? grid[row][col].toUpperCase() : filledGrid[row][col].toUpperCase()}</text>`;
             svgContentSolution += `<text x="${col * 15 + 5}" y="${row * 15 + 15}" text-anchor="middle" fill="${grid[row][col] ? 'red' : 'black'}" font-weight="${grid[row][col] ? 'bold' : 'normal'}">${grid[row][col] ? grid[row][col].toUpperCase() : filledGrid[row][col].toUpperCase()}</text>`;
         }
@@ -368,8 +371,8 @@ function generateSVG(puzzle, svgNum) {
     svgContainer1.classList.add('svg-container');
     svgContainer1.setAttribute('id', `svg-puzzle-${svgNum}`);
     const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svgElement.setAttribute('width', gridSize * 15);
-    svgElement.setAttribute('height', gridSize * 15);
+    svgElement.setAttribute('width', gridWidth * 15);
+    svgElement.setAttribute('height', gridHeight * 15);
     svgElement.setAttribute('font-size', fontSize);
     svgElement.setAttribute('font-family', font);
     svgElement.innerHTML = svgContent;
@@ -380,8 +383,8 @@ function generateSVG(puzzle, svgNum) {
     svgContainer2.classList.add('svg-container');
     svgContainer2.setAttribute('id', `svg-solution-${svgNum}`);
     const svgElementSolution = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svgElementSolution.setAttribute('width', gridSize * 15);
-    svgElementSolution.setAttribute('height', gridSize * 15);
+    svgElementSolution.setAttribute('width', gridWidth * 15);
+    svgElementSolution.setAttribute('height', gridHeight * 15);
     svgElementSolution.setAttribute('font-size', fontSize);
     svgElementSolution.setAttribute('font-family', font);
     svgElementSolution.innerHTML = svgContentSolution;
@@ -422,8 +425,8 @@ function generatePDFa4() {
     pdfa4Solutions.setFont(font);
     pdfa4Solutions.setFontSize(fontSize);
 
-    const puzzleWidth = gridSize * charSpacing;
-    const puzzleHeight = gridSize * charSpacing;
+    const puzzleWidth = gridWidth * charSpacing;
+    const puzzleHeight = gridHeight * charSpacing;
     const puzzleHeightWithNumPokemons = puzzleHeight + 10;
 
     const numPuzzles = allPuzzles.length;
@@ -444,8 +447,8 @@ function generatePDFa4() {
         const numPokemons = allPuzzles[i].numPokemons;
         const filledGrid = allPuzzles[i].grid;
 
-        for (let row = 0; row < gridSize; row++) {
-            for (let col = 0; col < gridSize; col++) {
+        for (let row = 0; row < gridHeight; row++) {
+            for (let col = 0; col < gridWidth; col++) {
                 const text = grid[row][col] ? grid[row][col].toUpperCase() : filledGrid[row][col].toUpperCase();
                 const x = pdfCol * (puzzleWidth + puzzleMargin) + col * charSpacing + pageMargin;
                 const y = pdfRow * (puzzleHeightWithNumPokemons + puzzleMargin) + row * charSpacing + pageMargin;
@@ -455,7 +458,7 @@ function generatePDFa4() {
         }
 
         const x = pdfCol * (puzzleWidth + puzzleMargin) + 0 * charSpacing + pageMargin;
-        const y = pdfRow * (puzzleHeightWithNumPokemons + puzzleMargin) + gridSize * charSpacing + pageMargin;
+        const y = pdfRow * (puzzleHeightWithNumPokemons + puzzleMargin) + gridHeight * charSpacing + pageMargin;
         const text = `Number of Pokemons: ${numPokemons}`;
         pdfa4Puzzles.text(text, x, y);
         pdfa4Solutions.setFont(font, 'normal').text(text, x, y);
@@ -503,8 +506,8 @@ function dirToStr(dir) {
 // fills empty places in grid with random chars
 function copyAndFillGrid(grid) {
     var newGrid = copyGrid(grid);
-    for (let row = 0; row < gridSize; row++) {
-        for (let col = 0; col < gridSize; col++) {
+    for (let row = 0; row < gridHeight; row++) {
+        for (let col = 0; col < gridWidth; col++) {
             if (newGrid[row][col] === '')
                 newGrid[row][col] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
 
@@ -514,9 +517,9 @@ function copyAndFillGrid(grid) {
 }
 
 function copyGrid(grid) {
-    var newGrid = Array.from({ length: gridSize }, () => Array(gridSize).fill(''));
-    for (let row = 0; row < gridSize; row++) {
-        for (let col = 0; col < gridSize; col++) {
+    var newGrid = Array.from({ length: gridHeight }, () => Array(gridWidth).fill(''));
+    for (let row = 0; row < gridHeight; row++) {
+        for (let col = 0; col < gridWidth; col++) {
             newGrid[row][col] = grid[row][col];
         }
     }
