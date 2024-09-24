@@ -67,8 +67,7 @@ window.addEventListener("DOMContentLoaded", function (event) {
     };
 
     document.getElementById('btnDownloadPdf').onclick = function () {
-        const numberOfPuzzles = document.getElementById('numPuzzles').value;
-        for (let i = 0; i < numberOfPuzzles; i++) {
+        for (let i = 0; i < allPuzzles.length; i++) {
             let svgElement = document.getElementById(`svg-puzzle-${i}`).firstElementChild;
             let svgElementSolution = document.getElementById(`svg-solution-${i}`).firstElementChild;
             exportPDF(svgElement, `puzzle-${i}`);
@@ -77,12 +76,13 @@ window.addEventListener("DOMContentLoaded", function (event) {
     };
 
     document.getElementById('btnDownloadPdfSingle').onclick = function () {
-        savePDFa4();
+        if (allPuzzles.length > 0) {
+            savePDFa4();
+        }
     };
 
     document.getElementById('btnDownloadSvg').onclick = function () {
-        const numberOfPuzzles = document.getElementById('numPuzzles').value;
-        for (let i = 0; i < numberOfPuzzles; i++) {
+        for (let i = 0; i < allPuzzles.length; i++) {
             let svgElement = document.getElementById(`svg-puzzle-${i}`).firstElementChild;
             let svgElementSolution = document.getElementById(`svg-solution-${i}`).firstElementChild;
 
