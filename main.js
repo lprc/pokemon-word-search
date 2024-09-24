@@ -143,15 +143,6 @@ function onGenerate() {
             (gen4 ? pokemons_en[3] : []));
     }
 
-    // take random entries from pokemons
-    const pokemon_filtered = [];
-    while (pokemon_filtered.length < numberOfPokemons) {
-        const randomIndex = Math.floor(Math.random() * pokemons.length);
-        const randomPokemon = pokemons.splice(randomIndex, 1)[0];
-        if (!randomPokemon.length <= gridSize && !pokemon_filtered.includes(randomPokemon)) {
-            pokemon_filtered.push(randomPokemon);
-        }
-    }
 
     if (DEBUG) {
         console.log("dir1: " + dir1);
@@ -176,11 +167,20 @@ function onGenerate() {
 
         console.log("first pokemon: " + pokemons[0]);
 
-        console.log("pokemons: " + pokemon_filtered);
         console.log("dirs: " + dirs.map(dirToStr));
     }
 
     for (let i = 0; i < numberOfPuzzles; i++) {
+        // take random entries from pokemons
+        const pokemon_filtered = [];
+        while (pokemon_filtered.length < numberOfPokemons) {
+            const randomIndex = Math.floor(Math.random() * pokemons.length);
+            const randomPokemon = pokemons.splice(randomIndex, 1)[0];
+            if (!randomPokemon.length <= gridSize && !pokemon_filtered.includes(randomPokemon)) {
+                pokemon_filtered.push(randomPokemon);
+            }
+        }
+
         let grid_and_num = generatePuzzle(pokemon_filtered, dirs);
         let grid = grid_and_num.grid;
         let numPlacedPokemons = grid_and_num.numPokemons;
