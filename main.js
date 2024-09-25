@@ -415,13 +415,13 @@ function generatePDFa4() {
     const puzzleMargin = parseInt(document.getElementById('puzzleMargin').value) || 12;
     const charSpacing = parseInt(document.getElementById('charSpacing').value) || 12;
 
-    pdfa4Puzzles = new jsPDF('p', 'pt', "a4");
+    pdfa4Puzzles = new jsPDF('p', 'pt', "a4", true);
     const width = pdfa4Puzzles.internal.pageSize.getWidth();
     const height = pdfa4Puzzles.internal.pageSize.getHeight();
     pdfa4Puzzles.setFont(font);
     pdfa4Puzzles.setFontSize(fontSize);
 
-    pdfa4Solutions = new jsPDF('p', 'pt', "a4");
+    pdfa4Solutions = new jsPDF('p', 'pt', "a4", true);
     pdfa4Solutions.setFont(font);
     pdfa4Solutions.setFontSize(fontSize);
 
