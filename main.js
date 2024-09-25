@@ -113,8 +113,8 @@ function onGenerate() {
     document.getElementById('solutions-container').innerHTML = "";
     allPuzzles = [];
 
-    gridWidth = parseInt(document.getElementById('numRows').value);
-    gridHeight = parseInt(document.getElementById('numCols').value);
+    gridHeight = parseInt(document.getElementById('numRows').value);
+    gridWidth = parseInt(document.getElementById('numCols').value);
 
     const dir1 = document.getElementById('dir1').checked;
     const dir2 = document.getElementById('dir2').checked;
