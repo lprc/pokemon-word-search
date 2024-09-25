@@ -1049,7 +1049,7 @@ const DIR = Object.freeze({
   BLTR: 7
 });
 class Puzzle {
-  constructor(grid, gridSolutions, pokemonsToFind, width, height, directions) {
+  constructor(grid, gridSolutions, pokemonsToFind, width, height, directions, showPokemonList) {
     this.grid = grid;
     this.gridSolutions = gridSolutions;
     this.pokemonsToFind = pokemonsToFind;
@@ -1057,6 +1057,7 @@ class Puzzle {
     this.width = width;
     this.height = height;
     this.directions = directions;
+    this.showPokemonList = showPokemonList;
   }
 }
 
@@ -1159,6 +1160,7 @@ function onGenerate() {
   const language = document.querySelector('input[name="lang"]:checked').value;
   const numberOfPokemons = document.getElementById('numPokemons').value;
   const numberOfPuzzles = document.getElementById('numPuzzles').value;
+  const showPokemonList = document.getElementById('showPokemonList').checked;
 
   // load pokemons by language and generation
   let pokemons = [];
@@ -1198,7 +1200,7 @@ function onGenerate() {
         pokemon_filtered.push(randomPokemon);
       }
     }
-    let puzzle = generatePuzzle(pokemon_filtered, dirs);
+    let puzzle = generatePuzzle(pokemon_filtered, dirs, showPokemonList);
 
     // allGrids.push(grid_and_num);
     // allFilledGrids.push(filledGrid);
@@ -1208,7 +1210,7 @@ function onGenerate() {
   generatePDFa4();
   previewPDFa4();
 }
-function generatePuzzle(inputWords, dirs) {
+function generatePuzzle(inputWords, dirs, showPokemonList) {
   var grid = Array.from({
     length: gridHeight
   }, () => Array(gridWidth).fill(''));
@@ -1239,7 +1241,7 @@ function generatePuzzle(inputWords, dirs) {
     console.table(grid);
   }
   let filledGrid = copyAndFillGrid(grid);
-  return new Puzzle(filledGrid, grid, pokemonsToFind, gridWidth, gridHeight, dirs);
+  return new Puzzle(filledGrid, grid, pokemonsToFind, gridWidth, gridHeight, dirs, showPokemonList);
 }
 function canPlaceWord(grid, word, row, col, direction) {
   if (direction === DIR.LR) {
@@ -1396,8 +1398,10 @@ function generatePDFa4() {
   const puzzleWidth = gridWidth * charSpacing;
   const puzzleHeight = gridHeight * charSpacing;
   const puzzleHeightWithNumPokemons = puzzleHeight + 10;
+  const pokemonListWidth = allPuzzles[0].showPokemonList ? pdfa4Puzzles.internal.pageSize.getWidth() - pageMargin * 2 - puzzleWidth - puzzleMargin * 2 : 0;
+  const puzzleWidthWithList = puzzleWidth + pokemonListWidth;
   const numPuzzles = allPuzzles.length;
-  const numPuzzlesPerRow = Math.floor(width / (puzzleWidth + puzzleMargin + pageMargin));
+  const numPuzzlesPerRow = Math.floor(width / (puzzleWidthWithList + puzzleMargin + pageMargin));
   const numPuzzlesPerCol = Math.floor(height / (puzzleHeightWithNumPokemons + puzzleMargin + pageMargin));
   const numPuzzlesPerPage = numPuzzlesPerRow * numPuzzlesPerCol;
   for (let i = 0; i < numPuzzles; i++) {
@@ -1413,17 +1417,32 @@ function generatePDFa4() {
     for (let row = 0; row < gridHeight; row++) {
       for (let col = 0; col < gridWidth; col++) {
         const text = grid[row][col] ? grid[row][col].toUpperCase() : filledGrid[row][col].toUpperCase();
-        const x = pdfCol * (puzzleWidth + puzzleMargin) + col * charSpacing + pageMargin;
+        const x = pdfCol * (puzzleWidthWithList + puzzleMargin) + col * charSpacing + pageMargin;
         const y = pdfRow * (puzzleHeightWithNumPokemons + puzzleMargin) + row * charSpacing + pageMargin;
         pdfa4Puzzles.text(text, x, y, 'center');
         pdfa4Solutions.setFont(font, grid[row][col] ? 'bold' : 'normal').text(text, x, y, 'center');
       }
     }
-    const x = pdfCol * (puzzleWidth + puzzleMargin) + 0 * charSpacing + pageMargin;
+
+    // print number of pokemons in this puzzle below
+    const x = pdfCol * (puzzleWidthWithList + puzzleMargin) + 0 * charSpacing + pageMargin;
     const y = pdfRow * (puzzleHeightWithNumPokemons + puzzleMargin) + gridHeight * charSpacing + pageMargin;
     const text = `Number of Pokemons: ${numPokemons}`;
     pdfa4Puzzles.text(text, x, y);
     pdfa4Solutions.setFont(font, 'normal').text(text, x, y);
+
+    // print list of pokemon, if desired, right of puzzle
+    if (allPuzzles[i].showPokemonList) {
+      const x = pdfCol * (puzzleWidthWithList + puzzleMargin) + gridWidth * charSpacing + pageMargin;
+      const y = pdfRow * (puzzleHeightWithNumPokemons + puzzleMargin) + pageMargin;
+      const text = 'Pokemons to find:\n' + allPuzzles[i].pokemonsToFind.join(', ');
+      pdfa4Puzzles.text(text, x, y, {
+        maxWidth: pokemonListWidth
+      });
+      pdfa4Solutions.text(text, x, y, {
+        maxWidth: pokemonListWidth
+      });
+    }
   }
 }
 function previewPDFa4() {
