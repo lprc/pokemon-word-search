@@ -200,7 +200,8 @@ function onGenerate() {
         const pokemon_filtered = [];
         while (pokemon_filtered.length < numberOfPokemons) {
             const randomIndex = Math.floor(Math.random() * pokemons.length);
-            const randomPokemon = pokemons.splice(randomIndex, 1)[0];
+            // const randomPokemon = pokemons.splice(randomIndex, 1)[0];
+            const randomPokemon = pokemons[randomIndex];
             if ((randomPokemon.length <= gridWidth || randomPokemon.length <= gridHeight) && !pokemon_filtered.includes(randomPokemon)) {
                 pokemon_filtered.push(randomPokemon);
             }
