@@ -106,6 +106,7 @@ window.addEventListener("DOMContentLoaded", function (event) {
     document.getElementById('puzzleMargin').onchange = updatePDFa4;
     document.getElementById('charSpacing').onchange = updatePDFa4;
     document.getElementById('orientation').onchange = updatePDFa4;
+    document.getElementById('pdfFormat').onchange = updatePDFa4;
 });
 
 // callback for submit
@@ -417,14 +418,15 @@ function generatePDFa4() {
     const puzzleMargin = parseInt(document.getElementById('puzzleMargin').value) || 12;
     const charSpacing = parseInt(document.getElementById('charSpacing').value) || 12;
     const orientation = (document.getElementById('orientation').value || "Portrait").toLowerCase()[0];
+    const format = (document.getElementById('pdfFormat').value || "a4").toLowerCase();
 
-    pdfa4Puzzles = new jsPDF(orientation, 'pt', "a4", true);
+    pdfa4Puzzles = new jsPDF(orientation, 'pt', format, true);
     const width = pdfa4Puzzles.internal.pageSize.getWidth();
     const height = pdfa4Puzzles.internal.pageSize.getHeight();
     pdfa4Puzzles.setFont(font);
     pdfa4Puzzles.setFontSize(fontSize);
 
-    pdfa4Solutions = new jsPDF(orientation, 'pt', "a4", true);
+    pdfa4Solutions = new jsPDF(orientation, 'pt', format, true);
     pdfa4Solutions.setFont(font);
     pdfa4Solutions.setFontSize(fontSize);
 
