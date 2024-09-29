@@ -107,6 +107,8 @@ window.addEventListener("DOMContentLoaded", function (event) {
     document.getElementById('charSpacing').onchange = updatePDFa4;
     document.getElementById('orientation').onchange = updatePDFa4;
     document.getElementById('pdfFormat').onchange = updatePDFa4;
+
+    document.getElementById('customWords').addEventListener('keyup', previewCustomWords);
 });
 
 // callback for submit
@@ -151,24 +153,26 @@ function onGenerate() {
     const gen4 = document.getElementById('gen4').checked;
 
     const language = document.querySelector('input[name="lang"]:checked').value;
-    const numberOfPokemons = document.getElementById('numPokemons').value;
     const numberOfPuzzles = document.getElementById('numPuzzles').value;
     const showPokemonList = document.getElementById('showPokemonList').checked;
 
     // load pokemons by language and generation
-    let pokemons = [];
-    if (language == "de") {
-        pokemons = pokemons.concat((gen1 ? pokemons_de[0] : []),
-            (gen2 ? pokemons_de[1] : []),
-            (gen3 ? pokemons_de[2] : []),
-            (gen4 ? pokemons_de[3] : []));
+    let pokemons = getCustomWords();
+    if (pokemons.length == 0) {
+        if (language == "de") {
+            pokemons = pokemons.concat((gen1 ? pokemons_de[0] : []),
+                (gen2 ? pokemons_de[1] : []),
+                (gen3 ? pokemons_de[2] : []),
+                (gen4 ? pokemons_de[3] : []));
+        }
+        else {
+            pokemons = pokemons.concat((gen1 ? pokemons_en[0] : []),
+                (gen2 ? pokemons_en[1] : []),
+                (gen3 ? pokemons_en[2] : []),
+                (gen4 ? pokemons_en[3] : []));
+        }
     }
-    else {
-        pokemons = pokemons.concat((gen1 ? pokemons_en[0] : []),
-            (gen2 ? pokemons_en[1] : []),
-            (gen3 ? pokemons_en[2] : []),
-            (gen4 ? pokemons_en[3] : []));
-    }
+    const numberOfPokemons = Math.min(document.getElementById('numPokemons').value, pokemons.length);
 
 
     if (DEBUG) {
@@ -542,4 +546,24 @@ function copyGrid(grid) {
         }
     }
     return newGrid;
+}
+
+function getCustomWords() {
+    return document.getElementById('customWords').value
+        .replace(/[ \t]/g, '')
+        .replace(/^\s*\n/gm, '')
+        .split('\n').filter(el => el);
+}
+
+function previewCustomWords() {
+    const customWords = getCustomWords();
+    const customWordsResults = document.getElementById('customWordsResult');
+    customWordsResults.innerHTML = '';
+
+    if (customWords.length > 0) {
+        customWordsResults.innerHTML = 'Filtered Custom Words:\n';
+        for (let i = 0; i < customWords.length; i++) {
+            customWordsResults.innerHTML += `<li>${customWords[i]}</li>`;
+        }
+    }
 }
