@@ -208,7 +208,7 @@ function onGenerate() {
             }
         }
 
-        let puzzle = generatePuzzle(pokemon_filtered, dirs, showPokemonList);
+        let puzzle = generatePuzzle(pokemon_filtered.sort(), dirs, showPokemonList);
 
         // allGrids.push(grid_and_num);
         // allFilledGrids.push(filledGrid);
