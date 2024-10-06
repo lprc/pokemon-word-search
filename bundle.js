@@ -1222,17 +1222,25 @@ function generatePuzzle(inputWords, dirs, showPokemonList) {
   let pokemonsToFind = [];
   for (const word of inputWords) {
     let placed = false;
-    let dir = dirs[Math.floor(Math.random() * dirs.length)];
+    // let dir = dirs[Math.floor(Math.random() * dirs.length)];
     let tryno = 0;
     while (!placed && tryno < retries) {
       const startRow = Math.floor(Math.random() * gridHeight);
       const startCol = Math.floor(Math.random() * gridWidth);
-      if (canPlaceWord(grid, word, startRow, startCol, dir)) {
-        placeWord(grid, word, startRow, startCol, dir);
+      let chosenDir = undefined;
+      shuffleArray(dirs);
+      for (const d of dirs) {
+        if (canPlaceWord(grid, word, startRow, startCol, d)) {
+          chosenDir = d;
+          break;
+        }
+      }
+      if (chosenDir) {
+        placeWord(grid, word, startRow, startCol, chosenDir);
         placed = true;
         pokemonsToFind.push(word);
         if (DEBUG) {
-          console.log(`word '${word}' placed at [${startRow}, ${startCol}] with direction '${dirToStr(dir)}'`);
+          console.log(`word '${word}' placed at [${startRow}, ${startCol}] with direction '${dirToStr(chosenDir)}'`);
         }
       }
       tryno++;
@@ -1519,6 +1527,12 @@ function previewCustomWords() {
     for (let i = 0; i < customWords.length; i++) {
       customWordsResults.innerHTML += `<li>${customWords[i]}</li>`;
     }
+  }
+}
+function shuffleArray(array) {
+  for (let i = array.length - 1; i >= 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
   }
 }
 
