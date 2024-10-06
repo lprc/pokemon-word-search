@@ -108,7 +108,17 @@ window.addEventListener("DOMContentLoaded", function (event) {
     document.getElementById('orientation').onchange = updatePDFa4;
     document.getElementById('pdfFormat').onchange = updatePDFa4;
 
+    document.getElementById('fontSize').onchange = updateMaxRowsAndColumns;
+    document.getElementById('font').onchange = updateMaxRowsAndColumns;
+    document.getElementById('pageMargin').onchange = updateMaxRowsAndColumns;
+    document.getElementById('puzzleMargin').onchange = updateMaxRowsAndColumns;
+    document.getElementById('charSpacing').onchange = updateMaxRowsAndColumns;
+    document.getElementById('orientation').onchange = updateMaxRowsAndColumns;
+    document.getElementById('pdfFormat').onchange = updateMaxRowsAndColumns;
+
     document.getElementById('customWords').addEventListener('keyup', previewCustomWords);
+
+    updateMaxRowsAndColumns();
 });
 
 // callback for submit
@@ -587,5 +597,48 @@ function shuffleArray(array) {
     for (let i = array.length - 1; i >= 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+// Return maximum number of columns that can fit on a page
+function pdfMaxRowsAndColumns() {
+    const fontSize = document.getElementById('fontSize').value || 12;
+    const font = document.getElementById('font').value || "Courier";
+    const pageMargin = parseInt(document.getElementById('pageMargin').value) || 20;
+    const puzzleMargin = parseInt(document.getElementById('puzzleMargin').value) || 12;
+    const charSpacing = parseInt(document.getElementById('charSpacing').value) || 12;
+    const orientation = (document.getElementById('orientation').value || "Portrait").toLowerCase()[0];
+    const format = (document.getElementById('pdfFormat').value || "a4").toLowerCase();
+
+    pdfa4Puzzles = new jsPDF(orientation, 'pt', format, true);
+    const width = pdfa4Puzzles.internal.pageSize.getWidth();
+    const height = pdfa4Puzzles.internal.pageSize.getHeight();
+    pdfa4Puzzles.setFont(font);
+    pdfa4Puzzles.setFontSize(fontSize);
+
+    const writableWidth = width - pageMargin * 2 - puzzleMargin * 2;
+    const writableHeight = height - pageMargin * 2 - puzzleMargin * 2;
+
+    const numCols = Math.floor(writableWidth / charSpacing);
+    const numRows = Math.floor(writableHeight / charSpacing);
+
+    return [numRows, numCols];
+}
+
+function updateMaxRowsAndColumns() {
+    const [numRows, numCols] = pdfMaxRowsAndColumns();
+    document.getElementById("hintMaxRows").innerHTML = `(Maximum number of rows with given PDF options: ${numRows})`;
+    document.getElementById("hintMaxCols").innerHTML = `(Maximum number of columns with given PDF options: ${numCols})`;
+
+    document.getElementById("numRows").max = numRows;
+    document.getElementById("numCols").max = numCols;
+
+    let chosenRows = document.getElementById("numRows").value;
+    let chosenCols = document.getElementById("numCols").value;
+    if (chosenRows > numRows) {
+        document.getElementById("numRows").value = numRows;
+    }
+    if (chosenCols > numCols) {
+        document.getElementById("numCols").value = numCols;
     }
 }
