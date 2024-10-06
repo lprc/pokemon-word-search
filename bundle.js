@@ -1173,6 +1173,11 @@ function onGenerate() {
       pokemons = pokemons.concat(gen1 ? pokemons_en[0] : [], gen2 ? pokemons_en[1] : [], gen3 ? pokemons_en[2] : [], gen4 ? pokemons_en[3] : []);
     }
   }
+
+  // check nidoran special rule
+  if (document.getElementById('nidoran').checked && gen1) {
+    pokemons = pokemons.concat(["NidoranM", "NidoranF"]);
+  }
   const numberOfPokemons = Math.min(document.getElementById('numPokemons').value, pokemons.length);
   if (DEBUG) {
     console.log("dir1: " + dir1);
