@@ -275,7 +275,7 @@ function generatePuzzle(inputWords, dirs, showPokemonList) {
         }
 
         if (DEBUG && !placed) {
-            console.log(`failed to place word '${word}' with direction '${dirToStr(dir)}'. Max retries reached.`);
+            console.log(`failed to place word '${word}'. Max retries reached.`);
         }
     }
 
