@@ -1064,7 +1064,7 @@ class Puzzle {
 // const gridSize = 20;
 var gridWidth = 20;
 var gridHeight = 20;
-const retries = 50; // number of retries to place a pokemon
+var retries = 50; // number of retries to place a pokemon
 
 // var allGrids = [];
 // var allFilledGrids = [];
@@ -1146,6 +1146,7 @@ function onGenerate() {
   allPuzzles = [];
   gridHeight = parseInt(document.getElementById('numRows').value);
   gridWidth = parseInt(document.getElementById('numCols').value);
+  retries = parseInt(document.getElementById('numRetries').value);
   const dir1 = document.getElementById('dir1').checked;
   const dir2 = document.getElementById('dir2').checked;
   const dir3 = document.getElementById('dir3').checked;
